@@ -80,7 +80,7 @@
                  ["doc/intro.md" (render "intro.md" data)]
                  [".gitignore" (render "gitignore" data)]
 
-                 ["src/main/java/com/google/apphosting/utils/security/SecurityManagerInstaller.java" (render "SecurityManagerInstaller.java" data)]
+                 ;; ["src/main/java/com/google/apphosting/utils/security/SecurityManagerInstaller.java" (render "SecurityManagerInstaller.java" data)]
 
                  ;; NB: treatment of '-', '_', '/', and '.'
                  ;; "lein new migae foo-bar" yields:
