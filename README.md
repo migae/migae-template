@@ -1,10 +1,10 @@
-# gaem
+# migae-template
 
-Leiningen templates for migae.
+Leiningen templates for migae (Google App Engine library.
 
 ## Usage
 
-FIXME
+`lein new migae myapp:gae-app-id path/to/gae/sdk`
 
 ## License
 
