@@ -1,4 +1,4 @@
-(defproject migae/lein-template "0.1.1-SNAPSHOT"
+(defproject migae/lein-template "0.1.0"
   :description "migae project template"
   :url "http://github.com/greynolds/migae"
   :license {:name "Eclipse Public License"
