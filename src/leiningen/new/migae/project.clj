@@ -70,9 +70,9 @@
   :resource-paths ["src/"]
   :compile-path "{{war}}/WEB-INF/classes"
   :target-path "{{war}}/WEB-INF/lib"
-  :keep-non-project-classes false
-  :omit-source true ;; default
-  :jar-exclusions [#"^WEB-INF/appengine-generated.*$"]
+  ;; CRITICAL!  Use :jar-exclusions to make sure the implementation code
+  ;; is not byte compiled into the jar.
+  :jar-exclusions [#".*impl*" #"^WEB-INF/appengine-generated.*$"]
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [compojure "1.1.5"]
                  [migae/migae-core "0.1.0-SNAPSHOT"]

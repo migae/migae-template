@@ -40,14 +40,15 @@
                            :services [{:svcname "user", :action "GET"
                                        :url-pattern "/user/*"
                                        :route "/user/:arg"
-                                       :arg {:var "arg"}}
-                                      {:svcname "login", :action "GET"
-                                       :url-pattern "/_ah/login_required"
-                                       :route "/_ah/login_required"}]}]
+                                       :arg {:var "arg"}}]}]
+                                      ;; {:svcname "login", :action "GET"
+                                      ;;  :url-pattern "/_ah/login_required"
+                                      ;;  :route "/_ah/login_required"}]}]
                :display-name (project-name appname)
                :project (project-name appname)
                :aots [{:aot (str appname ".request")}
-                      {:aot (str appname ".user")}]
+                      {:aot (str appname ".user")}
+                      {:aot (str appname ".filter")}]
                :namespace (str appname ".request")
                :projroot (name-to-path appname) ;; foo-bar -> foo_bar
                :welcome "index.html"
@@ -74,7 +75,9 @@
                                        (:name servlet)))]
               (->files servlet
                        ["src/{{name}}/{{class}}.clj"
-                        (render "servlet.clj" servlet)]))))
+                        (render "servlet.clj" servlet)]
+                       ["src/{{name}}/{{class}}_impl.clj"
+                        (render "servlet_impl.clj" servlet)]))))
 
 ;      (println "Generating other stuff")
       (binding [*dir* (.getPath (io/file (System/getProperty "leiningen.original.pwd") (:name data)))]
