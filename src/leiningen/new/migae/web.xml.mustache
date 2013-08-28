@@ -5,14 +5,22 @@
 	 version="2.5"
 	 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 
-  <display-name xmlns="">{{display-name}}</display-name>
+  <filter>
+    <filter-name>{{display-name}} filter</filter-name>
+    <filter-class>{{display-name}}.filter</filter-class>
+  </filter>
 
   {{#servlets}}
   {{#services}}
   <servlet>
+    <display-name>{{display-name}}</display-name>
     <servlet-name>{{svcname}}</servlet-name>
     <servlet-class>{{name}}.{{class}}</servlet-class>
   </servlet>
+  <filter-mapping>
+    <filter-name>{{display-name}} filter</filter-name>
+    <servlet-name>{{svcname}}</servlet-name>
+  </filter-mapping>
   <servlet-mapping>
     <servlet-name>{{svcname}}</servlet-name>
     <url-pattern>{{url-pattern}}</url-pattern>

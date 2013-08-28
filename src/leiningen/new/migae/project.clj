@@ -8,9 +8,6 @@
 ;; UNCOMMENT to disable security checks:
 ;;  :java-source-paths ["src/main/java"]
   :javac-options ["-nowarn" "-target" "1.7" "-source" "1.7" "-Xlint:-options"]
-  :resource-paths ["war/WEB-INF/classes/"
-                   "war/WEB-INF/lib/*"
-                   "{{sdk}}/lib/shared/*"]
   :jvm-opts ["-javaagent:{{sdk}}/lib/agent/appengine-agent.jar"
              "-Xbootclasspath/p:war/WEB-INF/lib/appengine-dev-jdk-overrides.jar"
              "-D--startOnFirstThread" ;; if os x
@@ -70,6 +67,7 @@
                         }
             }
   :aot [{{#aots}}{{aot}} {{/aots}}]
+  :resource-paths ["src/"]
   :compile-path "{{war}}/WEB-INF/classes"
   :target-path "{{war}}/WEB-INF/lib"
   :keep-non-project-classes false
@@ -77,16 +75,16 @@
   :jar-exclusions [#"^WEB-INF/appengine-generated.*$"]
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [compojure "1.1.5"]
-                 [migae/migae-kernel "0.1.0-SNAPSHOT"]
-                 ;; [migae.service/migae-blobstore "0.1.0-SNAPSHOT"]
-                 ;; [migae.service/migae-channel "0.1.0-SNAPSHOT"]
-                 ;; [migae.service/migae-datastore "0.1.0-SNAPSHOT"]
-                 ;; [migae.service/migae-images "0.1.0-SNAPSHOT"]
-                 ;; [migae.service/migae-mail "0.1.0-SNAPSHOT"]
-                 ;; [migae.service/migae-memcache "0.1.0-SNAPSHOT"]
-                 ;; [migae.service/migae-taskqueues "0.1.0-SNAPSHOT"]
-                 ;; [migae.service/migae-urlfetch "0.1.0-SNAPSHOT"]
-                 [migae.service/migae-user "0.1.0-SNAPSHOT"]
+                 [migae/migae-core "0.1.0-SNAPSHOT"]
+                 ;; [migae/migae-blobstore "0.1.0-SNAPSHOT"]
+                 ;; [migae/migae-channel "0.1.0-SNAPSHOT"]
+                 ;; [migae/migae-datastore "0.1.0-SNAPSHOT"]
+                 ;; [migae/migae-images "0.1.0-SNAPSHOT"]
+                 ;; [migae/migae-mail "0.1.0-SNAPSHOT"]
+                 ;; [migae/migae-memcache "0.1.0-SNAPSHOT"]
+                 ;; [migae/migae-taskqueues "0.1.0-SNAPSHOT"]
+                 ;; [migae/migae-urlfetch "0.1.0-SNAPSHOT"]
+                 [migae/migae-user "0.1.0-SNAPSHOT"]
                  [ring/ring-servlet "1.2.0"]
                  [ring/ring-devel "1.2.0"]
                  [hiccup "1.0.4"]

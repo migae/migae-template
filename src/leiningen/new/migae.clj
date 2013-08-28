@@ -1,6 +1,8 @@
 (ns leiningen.new.migae
-  (:require  [clojure.java.io :as io])
-  (:use [leiningen.new.templates :only [*dir* project-name
+  (:require  [clojure.java.io :as io]
+             [clojure.string :only [join]])
+  (:use
+        [leiningen.new.templates :only [*dir* project-name
                                         renderer multi-segment
                                         sanitize-ns name-to-path
                                         year ->files]]
@@ -21,6 +23,9 @@
          render (renderer "migae")
          main-ns (multi-segment (sanitize-ns appname))
          data {:name appname ;; ":name" key required by leiningen
+               :projdir (clojure.string/join "/"
+                              [(System/getProperty "leiningen.original.pwd")
+                                  appname])
                :appname appname
                :version "0.1.0-SNAPSHOT"
                :gae-app-id appid
@@ -80,6 +85,8 @@
                  ["doc/intro.md" (render "intro.md" data)]
                  [".gitignore" (render "gitignore" data)]
 
+                 [".dir-locals.el" (render "dir-locals.el" data)]
+
                  ;; ["src/main/java/com/google/apphosting/utils/security/SecurityManagerInstaller.java" (render "SecurityManagerInstaller.java" data)]
 
                  ;; NB: treatment of '-', '_', '/', and '.'
@@ -89,6 +96,10 @@
 
                  ;; ;; test: foo-bar.core-test -> foo_bar/core_test.clj
                  ["test/{{nested-dirs}}_test.clj" (render "core_test.clj" data)]
+
+                 ["src/{{name}}/filter.clj"
+                  (render "filter.clj" data)]
+
 
                  ;; app engine config files
                  ;; copy template w/o macro processing ('data' arg)
