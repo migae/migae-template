@@ -111,7 +111,7 @@
                  ["etc/appengine-web.xml.mustache"
                   (render "appengine-web.xml.mustache")]
                  ["etc/web.xml.mustache"
-                  (render "web.xml.mustache")]
+                  (render "web.xml.mustache" data)]
 
                  ;; resources install to source tree
                  ;; migae plugin "config" task will copy to war tree

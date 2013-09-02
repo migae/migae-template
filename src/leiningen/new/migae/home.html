@@ -10,14 +10,20 @@
   <body>
     <h1>Welcome to {{loc}}!</h1>
 
-  <ul>
-    <li><a href="html">Page html - static</a></li>
-    <li><a href="html/a">Page html/a - static</a></li>
-    <li><a href="html/b">Page html/b - static</a></li>
-    <li><a href="request/beer">Page request/beer</a> - request servlet.  Handles any path of the form /request/&lt;foo>.  Try request/milk+whiskey.
-    <li><a href="user/bob">Page user/bob</a> - user servlet.  Handles any path of form /user/&lt;foo>.</li>
-    <li><a href="_ah/login_required">login page - user servlet</a></li>
-  </ul>
+    <h2>Static resources</h2>
+    <ul>
+      <li><a href="html">Page html - static</a></li>
+      <li><a href="html/a">Page html/a - static</a></li>
+      <li><a href="html/b">Page html/b - static</a></li>
+    </ul>
+
+    <h2>Servlet services</h2>
+    <ul>
+      <li><a href="/request/hello/bob">/request/hello/bob</a> - myapp.request servlet.  Handles any path of the form /request/hello/&lt;foo>.</li>
+      <li><a href="/request/goodbye/bob">/request/goodbye/bob</a> - myapp.request servlet.  Handles any path of the form /request/hello/&lt;foo>.</li>
+      <li><a href="/user/hello/bob">/user/hello/bob</a> - myapp.user servlet.  Handles any path of the form /user/hello/&lt;foo>.</li>
+      <li><a href="/user/goodbye/bob">/user/goodbye/bob</a> - myapp.user servlet.  Handles any path of the form /user/hello/&lt;foo>.</li>
+    </ul>
 
   </body>
 </html>

@@ -6,25 +6,25 @@
 	 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 
   <filter>
-    <filter-name>{{display-name}} filter</filter-name>
+    <filter-name>{{display-name}}-filter</filter-name>
     <filter-class>{{display-name}}.filter</filter-class>
   </filter>
 
   {{#servlets}}
   {{#services}}
+  <servlet-mapping>
+    <url-pattern>{{url-pattern}}</url-pattern>
+    <servlet-name>{{svcname}}</servlet-name>
+  </servlet-mapping>
+  <filter-mapping>
+    <servlet-name>{{svcname}}</servlet-name>
+    <filter-name>{{display-name}}-filter</filter-name>
+  </filter-mapping>
   <servlet>
-    <display-name>{{display-name}}</display-name>
     <servlet-name>{{svcname}}</servlet-name>
     <servlet-class>{{name}}.{{class}}</servlet-class>
+    <display-name>{{name}}.{{class}} servlet</display-name>
   </servlet>
-  <filter-mapping>
-    <filter-name>{{display-name}} filter</filter-name>
-    <servlet-name>{{svcname}}</servlet-name>
-  </filter-mapping>
-  <servlet-mapping>
-    <servlet-name>{{svcname}}</servlet-name>
-    <url-pattern>{{url-pattern}}</url-pattern>
-  </servlet-mapping>
 
   {{/services}}
   {{/servlets}}

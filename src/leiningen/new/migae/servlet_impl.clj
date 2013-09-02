@@ -5,23 +5,13 @@
   (:require [compojure.route :as route]))
 
 (defroutes {{class}}-routes
-  (GET "/{{class}}/hello" [] "<h1>Hello World from {{name}}.{{class}} servlet!</h1>")
-  (GET "/{{class}}/goodbye" [] "<h1>Goodbye World! from {{name}}.{{class}} servlet!</h1>")
+  (GET "/{{class}}/hello/:you" [you]
+    (str (format "<h1>Ohayo %s from myapp.{{class}} servlet!</h1>" you)
+         "\n\n<a href='/'>home</a>"))
+  (GET "/{{class}}/goodbye/:you" [you]
+    (str (format "<h1>Sayonara %s from myapp.{{class}} servlet!</h1>" you)
+         "\n\n<a href='/'>home</a>"))
   (route/not-found "<h1>Page not found</h1>"))
-
-;; (defroutes theRouter
-;; (defroutes {{class}}-routes
-;; {{#services}}
-;;   (GET "{{route}}" [{{#arg}}{{var}}{{/arg}}]
-;;     {:status 200
-;;      :headers {"Content-Type" "text/html"}
-;;      :body (format "This is the <i>{{action}} {{svcname}}</i> service of the <i><b>{{name}}.{{class}}</b></i> servlet. {{#arg}}  Now serving <i>%s</i>." {{var}}{{/arg}}{{^arg}}"{{/arg}})})
-
-;; {{/services}}
-
-;;  (route/files "/" {:root "/public/"})
-
-  ;; (route/not-found "Sorry, {{name}}.{{class}} page not found\n"))
 
 (def {{class}}-handler
   (-> #'{{class}}-routes
