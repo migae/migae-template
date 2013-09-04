@@ -68,31 +68,31 @@
                :gae-app-id appid
                :gae-app-version "0-1-0"
                :raw-name appname
-               :filterclass (str (name-to-path appname) ".reload")
+               :filterclass (str (name-to-path appname) ".reload_filter")
                :servlets [{:servlet "request",
-                           :src (str (name-to-path appname) "/request"),
-                           :ns (str appname ".request"),
-                           :class (str (name-to-path appname) ".request"),
+                           :src (str (name-to-path appname) "/request_servlet"),
+                           :ns (str appname ".request-servlet"),
+                           :class (str (name-to-path appname) ".request_servlet"),
                            :services [{:service "request",
                                        :url-pattern "/request/*"}]}
                                        ;; :action "GET"
                                        ;; :route "/request/:rqst"
                                        ;; :arg {:var "rqst"}}]}
                           {:servlet "user",
-                           :src (str (name-to-path appname) "/user"),
-                           :ns (str appname ".user"),
-                           :class (str (name-to-path appname) ".user"),
+                           :src (str (name-to-path appname) "/user_servlet"),
+                           :ns (str appname ".user-servlet"),
+                           :class (str (name-to-path appname) ".user_servlet"),
                            :services [{:service "prefs",
                                        :url-pattern "/user/prefs"}
                                       {:service "login",
                                        :url-pattern "/user/login"}]}]
                :display-name (project-name appname)
                :project (project-name appname)
-               :aots [{:aot (str appname ".request")}
-                      {:aot (str appname ".user")}
-                      {:aot (str appname ".reload")}]
-               :namespace (str appname ".request")
                :projroot (name-to-path appname) ;; foo-bar -> foo_bar
+               :aots [{:aot (str appname ".request-servlet")}
+                      {:aot (str appname ".user-servlet")}
+                      {:aot (str appname ".reload-filter")}]
+               :namespace (str appname ".request")
                :welcome "index.html"
                :sdk sdk
                :war "war"
@@ -111,18 +111,23 @@
       (println "\nGenerating servlets from template")
       (doseq [s (:servlets data)]
         (let [servlet (assoc s
+                        :appname (:appname data)
                         :name (:name data)
                         :projroot (:projroot data))
-              tofile (name-to-path (render-text "src/{{src}}" servlet))]
+              proj (name-to-path (:appname data))
+              toservlet (name-to-path (render-text "src/{{src}}" servlet))
+              toimpl (name-to-path (render-text
+                                    "src/{{appname}}/{{servlet}}"
+                                    servlet))
+              foo (println (format "foo: %s" toimpl))]
           (binding [*dir* (.getPath (io/file
                                      (System/getProperty
                                       "leiningen.original.pwd")
                                      (:name servlet)))]
             (->files servlet
-                     [(str tofile ".clj")
+                     [(str toservlet ".clj")
                       (render "servlet.clj" servlet)]
-                     ;; ["src/{{name}}/{{class}}_impl.clj"
-                     [(str tofile "_impl.clj")
+                     [(str toimpl "_impl.clj")
                       (render "servlet_impl.clj" servlet)]))))
 
       (println "\nGenerating other stuff")
@@ -136,7 +141,7 @@
 
                  ["src/.dir-locals.el" (render "dir-locals.el" data)]
 
-                 ["src/{{projroot}}/reload.clj"
+                 ["src/{{projroot}}/reload_filter.clj"
                   (render "reloadfilter.clj" data)]
 
                  ;; ["src/main/java/com/google/apphosting/utils/security/SecurityManagerInstaller.java" (render "SecurityManagerInstaller.java" data)]

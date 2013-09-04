@@ -8,7 +8,7 @@
   <!-- #################### -->
 {{#filters}}
   <filter>
-    <filter-name>{{filter}}-filter</filter-name>
+    <filter-name>{{filter}}</filter-name>
     <filter-class>{{class}}</filter-class>
   </filter>
 {{/filters}}
@@ -26,13 +26,13 @@
   {{#filters}}
   <filter-mapping>
     <servlet-name>{{servlet}}</servlet-name>
-    <filter-name>{{filter}}-filter</filter-name>
+    <filter-name>{{filter}}</filter-name>
   </filter-mapping>
   {{/filters}}
   <servlet>
     <servlet-name>{{servlet}}</servlet-name>
     <servlet-class>{{class}}</servlet-class>
-    <display-name>{{ns}}-servlet</display-name>
+    <display-name>{{ns}}</display-name>
   </servlet>
 
   {{/servlets}}
