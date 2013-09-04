@@ -88,7 +88,7 @@
                  ["doc/intro.md" (render "intro.md" data)]
                  [".gitignore" (render "gitignore" data)]
 
-                 [".dir-locals.el" (render "dir-locals.el" data)]
+                 ["src/.dir-locals.el" (render "dir-locals.el" data)]
 
                  ;; ["src/main/java/com/google/apphosting/utils/security/SecurityManagerInstaller.java" (render "SecurityManagerInstaller.java" data)]
 
@@ -111,7 +111,7 @@
                  ["etc/appengine-web.xml.mustache"
                   (render "appengine-web.xml.mustache")]
                  ["etc/web.xml.mustache"
-                  (render "web.xml.mustache" data)]
+                  (render "web.xml.mustache")]
 
                  ;; resources install to source tree
                  ;; migae plugin "config" task will copy to war tree

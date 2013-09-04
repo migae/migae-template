@@ -4,9 +4,9 @@
 	war/WEB-INF/appengine-web.xml.  Edit project.clj instead.
 -->
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
-
-  <application>{{app-id}}</application>
-  <version>{{version}}</version>
+{{#migae}}
+  <application>{{id}}</application>
+  <version>{{#version}}{{dev}}{{/version}}</version>
 
   <threadsafe>{{threads}}</threadsafe>
 
@@ -51,5 +51,5 @@
       <page name="Appstats" url="/appstats" />
     </admin-console>
    -->
-
+{{/migae}}
 </appengine-web-app>
