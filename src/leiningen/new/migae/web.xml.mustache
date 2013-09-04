@@ -5,34 +5,44 @@
 	 version="2.5"
 	 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 {{#migae}}
+  <!-- #################### -->
+{{#filters}}
   <filter>
-    <filter-name>{{display-name}}-filter</filter-name>
-    <filter-class>{{display-name}}.filter</filter-class>
+    <filter-name>{{filter}}-filter</filter-name>
+    <filter-class>{{class}}</filter-class>
   </filter>
+{{/filters}}
 
   {{#servlets}}
   {{#services}}
+  <!-- #################### -->
   <servlet-mapping>
     <url-pattern>{{url-pattern}}</url-pattern>
-    <servlet-name>{{svcname}}</servlet-name>
+    <servlet-name>{{servlet}}</servlet-name>
   </servlet-mapping>
+  {{/services}}
+
+  <!-- #################### -->
+  {{#filters}}
   <filter-mapping>
-    <servlet-name>{{svcname}}</servlet-name>
-    <filter-name>{{display-name}}-filter</filter-name>
+    <servlet-name>{{servlet}}</servlet-name>
+    <filter-name>{{filter}}-filter</filter-name>
   </filter-mapping>
+  {{/filters}}
   <servlet>
-    <servlet-name>{{svcname}}</servlet-name>
-    <servlet-class>{{name}}.{{class}}</servlet-class>
-    <display-name>{{name}}.{{class}} servlet</display-name>
+    <servlet-name>{{servlet}}</servlet-name>
+    <servlet-class>{{class}}</servlet-class>
+    <display-name>{{ns}}-servlet</display-name>
   </servlet>
 
-  {{/services}}
   {{/servlets}}
 
+  <!-- #################### -->
   <welcome-file-list>
     <welcome-file>{{welcome}}</welcome-file>
   </welcome-file-list>
 
+  <!-- #################### -->
   <error-page>
     <error-code>404</error-code>
     <location>/404.html</location>

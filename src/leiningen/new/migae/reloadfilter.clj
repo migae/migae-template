@@ -1,4 +1,4 @@
-(ns {{name}}.filter
+(ns {{name}}.reload
   (:import (javax.servlet Filter FilterChain FilterConfig
                           ServletRequest ServletResponse))
   (:gen-class :implements [javax.servlet.Filter]))

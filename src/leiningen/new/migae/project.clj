@@ -12,8 +12,13 @@
           :version  {:dev "-{{gae-app-version}}"
                      :test "-{{gae-app-version}}"
                      :prod "-{{gae-app-version}}"}
-          :servlets [{{#servlets}}{:name "{{name}}", :class "{{class}}",
-                                   :services [{{#services}}{:svcname "{{svcname}}" :url-pattern  "{{url-pattern}}"}
+          :filters [{:filter "reload" :ns "{{name}}.reload" :class "{{filterclass}}"}]
+          :servlets [{{#servlets}}{:servlet "{{servlet}}",
+                      :src "{{src}}.clj"
+                      :ns "{{ns}}",
+                      :class "{{class}}",
+                      :filters [{:filter "reload"}]
+                      :services [{{#services}}{:service "{{service}}" :url-pattern  "{{url-pattern}}"}
                                               {{/services}}]}
                      {{/servlets}}]
           :war "{{war}}"

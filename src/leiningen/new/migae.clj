@@ -3,10 +3,47 @@
              [clojure.string :only [join]])
   (:use
         [leiningen.new.templates :only [*dir* project-name
-                                        renderer multi-segment
+                                        renderer
+                                        render-text
+                                        multi-segment
                                         sanitize-ns name-to-path
-                                        year ->files]]
+                                        ->files
+                                        year]]
         [leiningen.core.main :only [abort]]))
+
+
+(defn- template-path [name path data]
+  (io/file name (render-text path data)))
+
+(defn ->filesx
+  "Generate a file with content. path can be a java.io.File or string.
+  It will be turned into a File regardless. Any parent directories will
+  be created automatically. Data should include a key for :name so that
+  the project is created in the correct directory"
+  [{:keys [name] :as data} & paths]
+  (let [dir (or *dir*
+                (-> (System/getProperty "leiningen.original.pwd")
+                    (io/file name) (.getPath)))]
+;        foo (println (format "->files dir: %s" dir))]
+    (if (or *dir* (.mkdir (io/file dir)))
+      (doseq [path paths]
+        (do ;(println (format "topath %s" (first path)))
+            (println (format "  rendered: %s" (template-path dir (first path) data)))
+        (if (string? path)
+          (do (println (format "mkdirs %s"  (template-path dir path data)))
+              (.mkdirs (template-path dir path data)))
+          (let [[path content & options] path
+                path (template-path dir path data)
+                options (apply hash-map options)]
+            (.mkdirs (.getParentFile path))
+            (io/copy content (io/file path))
+            (when (:executable options)
+              (.setExecutable path true)))))
+      (println (str "Could not create directory " dir
+                      ". Maybe it already exists?"))))))
+
+
+
 
 ;; main template entry point
 (defn migae
@@ -31,24 +68,29 @@
                :gae-app-id appid
                :gae-app-version "0-1-0"
                :raw-name appname
-               :servlets [{:name appname, :class "request",
-                           :services [{:svcname "request", :action "GET"
-                                       :url-pattern "/request/*"
-                                       :route "/request/:rqst"
-                                       :arg {:var "rqst"}}]}
-                          {:name appname, :class "user",
-                           :services [{:svcname "user", :action "GET"
-                                       :url-pattern "/user/*"
-                                       :route "/user/:arg"
-                                       :arg {:var "arg"}}]}]
-                                      ;; {:svcname "login", :action "GET"
-                                      ;;  :url-pattern "/_ah/login_required"
-                                      ;;  :route "/_ah/login_required"}]}]
+               :filterclass (str (name-to-path appname) ".reload")
+               :servlets [{:servlet "request",
+                           :src (str (name-to-path appname) "/request"),
+                           :ns (str appname ".request"),
+                           :class (str (name-to-path appname) ".request"),
+                           :services [{:service "request",
+                                       :url-pattern "/request/*"}]}
+                                       ;; :action "GET"
+                                       ;; :route "/request/:rqst"
+                                       ;; :arg {:var "rqst"}}]}
+                          {:servlet "user",
+                           :src (str (name-to-path appname) "/user"),
+                           :ns (str appname ".user"),
+                           :class (str (name-to-path appname) ".user"),
+                           :services [{:service "prefs",
+                                       :url-pattern "/user/prefs"}
+                                      {:service "login",
+                                       :url-pattern "/user/login"}]}]
                :display-name (project-name appname)
                :project (project-name appname)
                :aots [{:aot (str appname ".request")}
                       {:aot (str appname ".user")}
-                      {:aot (str appname ".filter")}]
+                      {:aot (str appname ".reload")}]
                :namespace (str appname ".request")
                :projroot (name-to-path appname) ;; foo-bar -> foo_bar
                :welcome "index.html"
@@ -66,20 +108,24 @@
                :log4j-logging "log4j.properties"}]
       (println "Generating an migae project called " appname ", app id " appid ", using the 'migae' template.")
 
-;      (println "Generating servlet skeletons")
-      (doseq [servlet (:servlets data)]
-        (do ;(println servlet)
-            (binding [*dir* (.getPath (io/file
-                                       (System/getProperty
-                                        "leiningen.original.pwd")
-                                       (:name servlet)))]
-              (->files servlet
-                       ["src/{{name}}/{{class}}.clj"
-                        (render "servlet.clj" servlet)]
-                       ["src/{{name}}/{{class}}_impl.clj"
-                        (render "servlet_impl.clj" servlet)]))))
+      (println "\nGenerating servlets from template")
+      (doseq [s (:servlets data)]
+        (let [servlet (assoc s
+                        :name (:name data)
+                        :projroot (:projroot data))
+              tofile (name-to-path (render-text "src/{{src}}" servlet))]
+          (binding [*dir* (.getPath (io/file
+                                     (System/getProperty
+                                      "leiningen.original.pwd")
+                                     (:name servlet)))]
+            (->files servlet
+                     [(str tofile ".clj")
+                      (render "servlet.clj" servlet)]
+                     ;; ["src/{{name}}/{{class}}_impl.clj"
+                     [(str tofile "_impl.clj")
+                      (render "servlet_impl.clj" servlet)]))))
 
-;      (println "Generating other stuff")
+      (println "\nGenerating other stuff")
       (binding [*dir* (.getPath (io/file (System/getProperty "leiningen.original.pwd") (:name data)))]
         (->files data
                  ;; to file  		from template
@@ -90,6 +136,9 @@
 
                  ["src/.dir-locals.el" (render "dir-locals.el" data)]
 
+                 ["src/{{projroot}}/reload.clj"
+                  (render "reloadfilter.clj" data)]
+
                  ;; ["src/main/java/com/google/apphosting/utils/security/SecurityManagerInstaller.java" (render "SecurityManagerInstaller.java" data)]
 
                  ;; NB: treatment of '-', '_', '/', and '.'
@@ -99,10 +148,6 @@
 
                  ;; ;; test: foo-bar.core-test -> foo_bar/core_test.clj
                  ["test/{{nested-dirs}}_test.clj" (render "core_test.clj" data)]
-
-                 ["src/{{name}}/filter.clj"
-                  (render "filter.clj" data)]
-
 
                  ;; app engine config files
                  ;; copy template w/o macro processing ('data' arg)
@@ -130,8 +175,6 @@
                   (render "index.html" (conj {:loc "B"} data))]
                  ["{{statics_src}}/request/{{welcome}}"
                   (render "index.html" (conj {:loc "Request"} data))]
-                 ["{{statics_src}}/user/{{welcome}}"
-                  (render "index.html" (conj {:loc "User"} data))]
 
                  ["{{statics_src}}/css/{{project}}.css"
                   (render "project.css" data)]

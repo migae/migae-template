@@ -19,10 +19,11 @@
 
     <h2>Servlet services</h2>
     <ul>
-      <li><a href="/request/hello/bob">/request/hello/bob</a> - myapp.request servlet.  Handles any path of the form /request/hello/&lt;foo>.</li>
-      <li><a href="/request/goodbye/bob">/request/goodbye/bob</a> - myapp.request servlet.  Handles any path of the form /request/hello/&lt;foo>.</li>
-      <li><a href="/user/hello/bob">/user/hello/bob</a> - myapp.user servlet.  Handles any path of the form /user/hello/&lt;foo>.</li>
-      <li><a href="/user/goodbye/bob">/user/goodbye/bob</a> - myapp.user servlet.  Handles any path of the form /user/hello/&lt;foo>.</li>
+  {{#servlets}}
+  {{#services}}
+      <li><a href="{{url-pattern}}">{{url-pattern}}</a> - {{name}}.{{class}} servlet.  Handles any path of the form {{url-pattern}}>.</li>
+  {{/services}}
+  {{/servlets}}
     </ul>
 
   </body>
