@@ -1,6 +1,7 @@
 (ns {{name}}.reload-filter
   (:import (javax.servlet Filter FilterChain FilterConfig
                           ServletRequest ServletResponse))
+  (:require [clojure.tools.logging :as log :only [debug info]])
   (:gen-class :implements [javax.servlet.Filter]))
 
 (defn -init [^Filter this ^FilterConfig cfg])
@@ -11,5 +12,11 @@
    ^ServletResponse resp
    ^FilterChain chain]
   (do
-    (require '{{name}}.request-impl '{{name}}.user-impl :reload);; :verbose)
+    (log/info "reloading...")
+    (require
+     {{#servlets}}
+     '{{appname}}.{{servlet}}-impl
+     {{/servlets}}
+     ;; :verbose
+     :reload)
     (.doFilter chain rqst resp)))
