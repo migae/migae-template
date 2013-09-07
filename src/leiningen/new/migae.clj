@@ -118,8 +118,8 @@
               toservlet (name-to-path (render-text "src/{{src}}" servlet))
               toimpl (name-to-path (render-text
                                     "src/{{appname}}/{{servlet}}"
-                                    servlet))
-              foo (println (format "foo: %s" toimpl))]
+                                    servlet))]
+;              foo (println (format "foo: %s" toimpl))]
           (binding [*dir* (.getPath (io/file
                                      (System/getProperty
                                       "leiningen.original.pwd")
@@ -139,8 +139,6 @@
                  ["doc/intro.md" (render "intro.md" data)]
                  [".gitignore" (render "gitignore" data)]
 
-                 ["src/.dir-locals.el" (render "dir-locals.el" data)]
-
                  ["src/{{projroot}}/reload_filter.clj"
                   (render "reloadfilter.clj" data)]
 
@@ -158,10 +156,12 @@
                  ;; copy template w/o macro processing ('data' arg)
                  ;; install in hidden dir?  or etc?
                  ;; [".{{appname}}/appengine-web.xml.mustache"
-                 ["etc/appengine-web.xml.mustache"
-                  (render "appengine-web.xml.mustache")]
-                 ["etc/web.xml.mustache"
-                  (render "web.xml.mustache")]
+
+                 ["etc/appengine-web.xml.mustache" (render "appengine-web.xml.mustache")]
+                 ["etc/dir-locals.el.mustache" (render "dir-locals.el.mustache")]
+                 ["etc/{{java-logging}}" (render "logging.properties")]
+                 ["etc/{{log4j-logging}}" (render "log4j.properties")]
+                 ["etc/web.xml.mustache" (render "web.xml.mustache")]
 
                  ;; resources install to source tree
                  ;; migae plugin "config" task will copy to war tree
@@ -187,9 +187,6 @@
                   (render "project.js" data)]
                  ["{{resources_src}}/favicon.ico"
                   (render "favicon.ico" data)]
-
-                 ["etc/{{java-logging}}" (render "logging.properties" data)]
-                 ["etc/{{log4j-logging}}" (render "log4j.properties" data)]
 
                  ;; templates?
                  ;; ["private/hiccup/{{appname}}.???" (render "..." data)]
