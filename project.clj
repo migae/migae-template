@@ -1,4 +1,4 @@
-(defproject migae/lein-template "0.2.0"
+(defproject migae/lein-template "0.2.1-SNAPSHOT"
   :description "migae project template"
   :url "http://github.com/greynolds/migae-template"
   :source-paths ["src" "src/main/clojure"]
