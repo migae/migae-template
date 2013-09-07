@@ -125,7 +125,7 @@
                                       "leiningen.original.pwd")
                                      (:name servlet)))]
             (->files servlet
-                     [(str toservlet ".clj")
+                     [(str toservlet "-servlet.clj")
                       (render "servlet.clj" servlet)]
                      [(str toimpl "_impl.clj")
                       (render "servlet_impl.clj" servlet)]))))
