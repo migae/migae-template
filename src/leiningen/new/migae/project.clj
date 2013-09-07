@@ -6,6 +6,7 @@
   :url "{{proj-url}}"
 
   :migae {:sdk "{{sdk}}"
+          :devlog "devserver.log" ;; for 'lein migae run' stdout/stderr
           :id "{{gae-app-id}}"
           ;; GAE version ID
           ;; using '-' prefix on version nbr forces user to customize
