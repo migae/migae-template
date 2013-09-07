@@ -4,7 +4,13 @@ Leiningen templates for migae (Google App Engine library.
 
 ## Usage
 
-`lein new migae myapp:gae-app-id path/to/gae/sdk`
+```Clojure
+lein new migae myapp:gae-app-id path/to/gae/sdk
+```
+
+## TODO
+
+Make reload filter reload only changed code.
 
 ## License
 
