@@ -48,11 +48,12 @@
           }
   :aot [{{#aots}}{{aot}} {{/aots}}]
   :resource-paths ["src/"]
+  :web-inf "{{war}}/WEB-INF"
   :compile-path "{{war}}/WEB-INF/classes"
   :target-path "{{war}}/WEB-INF/lib"
   :libdir-path "{{war}}/WEB-INF/lib"
   :jar-exclusions [#".*impl*" #"^WEB-INF/appengine-generated.*$"]
-  :clean-targets [:compile-path :target-path]
+  :clean-targets [:web-inf]
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [compojure "1.1.5"]
                  [ring/ring-servlet "1.2.0"]
