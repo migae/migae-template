@@ -24,6 +24,9 @@
                       :services [{{#services}}{:service "{{service}}" :url-pattern  "{{url-pattern}}"}
                                               {{/services}}]}
                      {{/servlets}}]
+          ;; :security [{:url-pattern "/*"
+          ;;            :web-resource-name "foo"
+          ;;            :role-name "*"}]
           :war "{{war}}"
           :display-name "{{display-name}}"
           :welcome "{{welcome}}"
@@ -47,7 +50,7 @@
                       ;; :exclude {:pattern "bar/**"}
                       }
           }
-  :aot [{{#aots}}{{aot}} {{/aots}}]
+  :aot [#".*servlet.cjl" #".*filter.clj"] ;; [{{#aots}}{{aot}} {{/aots}}]
   :resource-paths ["src/"]
   :web-inf "{{war}}/WEB-INF"
   :compile-path "{{war}}/WEB-INF/classes"

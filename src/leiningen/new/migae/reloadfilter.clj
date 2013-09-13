@@ -5,6 +5,7 @@
   (:gen-class :implements [javax.servlet.Filter]))
 
 (defn -init [^Filter this ^FilterConfig cfg])
+(defn -destroy [^Filter this])
 
 (defn -doFilter
   [^Filter this
