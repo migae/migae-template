@@ -177,28 +177,6 @@
       (make-servlet projname (list (str/join ":" [(pmap :appname) "request"])))
       (make-servlet projname (list (str/join ":" [(pmap :appname) "user"])))
 
-      ;; (doseq [s (:servlets pmap)]
-      ;;   (let [servlet (assoc s
-      ;;                   :appname (:appname pmap)
-      ;;                   :name (:name pmap)
-      ;;                   :projroot (:projroot pmap))
-      ;;         proj (name-to-path (:appname pmap))
-      ;;         toservlet (name-to-path (render-text
-      ;;                                  "src/{{appname}}/{{-servlet}}"
-      ;;                                  servlet))
-      ;;         toimpl (name-to-path (render-text
-      ;;                               "src/{{appname}}/{{-servlet}}"
-      ;;                               servlet))]
-      ;;     (binding [*dir* (.getCanonicalPath (io/file
-      ;;                                         (System/getProperty
-      ;;                                          "leiningen.original.pwd")
-      ;;                                         (:name servlet)))]
-      ;;       (->files servlet
-      ;;                [(str toservlet "_servlet.clj")
-      ;;                 (render "servlet.clj" servlet)]
-      ;;                [(str toimpl "_impl.clj")
-      ;;                 (render "servlet_impl.clj" servlet)]))))
-
       (binding [*dir* (.getPath
                        (io/file
                         (System/getProperty "leiningen.original.pwd")
