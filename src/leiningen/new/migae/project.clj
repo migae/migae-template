@@ -16,7 +16,7 @@
           :filters [{:filter "reload_filter"
                      :ns "{{name}}.reload-filter"
                      :class "{{filterclass}}"}]
-          :servlets [{{#servlets}}{:servlet "{{servlet}}",
+          :servlets [{{#servlets}}{:servlet "{{-servlet}}",
                       :src "{{src}}.clj"
                       :ns "{{ns}}",
                       :class "{{class}}",
