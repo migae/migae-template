@@ -2,6 +2,8 @@
 /lib
 /classes
 /checkouts
+/war
+/tmp
 pom.xml
 pom.xml.asc
 *.jar
@@ -10,3 +12,4 @@ pom.xml.asc
 .lein-failures
 .lein-plugins
 .lein-repl-history
+.dir-locals.el

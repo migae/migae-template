@@ -189,7 +189,7 @@
                  [".gitignore" (render "gitignore" pmap)]
 
                  ["src/{{projroot}}/reload_filter.clj"
-                  (render "reloadfilter.clj" pmap)]
+                  (render "reload_filter.clj" pmap)]
 
                  ;; ["src/main/java/com/google/apphosting/utils/security/SecurityManagerInstaller.java" (render "SecurityManagerInstaller.java" pmap)]
 
@@ -208,9 +208,10 @@
 
                  ["etc/appengine-web.xml.mustache" (render "appengine-web.xml.mustache")]
                  ["etc/dir-locals.el.mustache" (render "dir-locals.el.mustache")]
-                 ["etc/{{java-logging}}" (render "logging.properties")]
-                 ["etc/{{log4j-logging}}" (render "log4j.properties")]
+                 ["etc/logging.properties" (render "logging.properties")]
+                 ["etc/log4j.properties" (render "log4j.properties")]
                  ["etc/web.xml.mustache" (render "web.xml.mustache")]
+                 ["etc/migae-save-buffer.el" (render "migae-save-buffer.el")]
 
                  ;; resources install to source tree
                  ;; migae plugin "config" task will copy to war tree
