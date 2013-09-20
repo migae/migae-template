@@ -4,7 +4,7 @@ Leiningen templates for migae (Google App Engine library.
 
 ## Usage
 
-`lein new migae app myapp:gae-app-id path/to/gae/sdk` - Create webapp myapp, with Google App Engine applicatin Id gae-app.
+`lein new migae app myapp:gae-app-id path/to/gae/sdk` - Create webapp myapp, with Google App Engine applicatin Id gae-app-id.
 
 `lein new migae servlet myapp:myservlet` - Create a new servlet skeleton in myapp (run from root dir)
 
