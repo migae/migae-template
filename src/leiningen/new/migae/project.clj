@@ -32,7 +32,7 @@
           :welcome "{{welcome}}"
           :threads {{threads}},
           :sessions {{sessions}},
-          :java-logging "{{java-logging}}",
+          :logging [:jul :slf4j]
           ;; static-files: html, css, js, etc.
           :statics {:src "src/main/public"
                     :dest ""
