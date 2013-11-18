@@ -6,8 +6,8 @@
 
 (defroutes {{-servlet}}-routes
   {{#services}}
-  (GET "{{url-pattern}}" []
-    (str (format "<h1>Ohayo from {{appname}}.{{-servlet}}-impl servlet path {{url-pattern}}!</h1>")
+  (GET "{{url-pattern}}" {uri :uri}
+    (str (format "<h1>Ohayo from {{appname}}.{{-servlet}}-impl servlet path %s</h1>" uri)
          "\n\n<a href='/'>home</a>"))
   {{/services}}
 

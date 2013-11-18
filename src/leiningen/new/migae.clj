@@ -67,15 +67,27 @@
        :gae-app-version "0-1-0"
        :raw-name appname
        :filterclass (str (name-to-path appname) ".reload_filter")
-       :servlets [{:-servlet "request",
-                   :src (str (name-to-path appname) "/request_servlet"),
-                   :ns (str appname ".request-servlet"),
-                   :class (str (name-to-path appname) ".request_servlet"),
-                   :services [{:service "request",
-                               :url-pattern "/request/*"}]}
+       :servlets [{:-servlet "core",
+                   :src (str (name-to-path appname) "/core_servlet"),
+                   :ns (str appname ".core-servlet"),
+                   :class (str (name-to-path appname) ".core_servlet"),
+                   :services [{:service "core",
+                               :url-pattern "/core/*"}]}
                   ;; :action "GET"
-                  ;; :route "/request/:rqst"
+                  ;; :route "/core/:rqst"
                   ;; :arg {:var "rqst"}}]}
+                  {:-servlet "admin",
+                   :src (str (name-to-path appname) "/admin_servlet"),
+                   :ns (str appname ".admin-servlet"),
+                   :class (str (name-to-path appname) ".admin_servlet"),
+                   :services [{:service "admin",
+                               :url-pattern "/admin/*"}]}
+                  {:-servlet "repl",
+                   :src (str (name-to-path appname) "/repl_servlet"),
+                   :ns (str appname ".repl-servlet"),
+                   :class (str (name-to-path appname) ".repl_servlet"),
+                   :services [{:service "repl",
+                               :url-pattern "/repl/*"}]}
                   {:-servlet "user",
                    :src (str (name-to-path appname) "/user_servlet"),
                    :ns (str appname ".user-servlet"),
@@ -84,19 +96,24 @@
                                :url-pattern "/user/prefs"}
                               {:service "login",
                                :url-pattern "/user/login"}]}]
+       :security [{:url-pattern "/admin/*"
+                   :web-resource-name "admin"
+                   :role-name "admin"}]
        :display-name (project-name appname)
        :project (project-name appname)
        :projroot (name-to-path appname) ;; foo-bar -> foo_bar
-       :aots [{:aot (str appname ".request-servlet")}
+       :aots [{:aot (str appname ".core-servlet")}
+              {:aot (str appname ".admin-servlet")}
+              {:aot (str appname ".repl-servlet")}
               {:aot (str appname ".user-servlet")}
               {:aot (str appname ".reload-filter")}]
-       :namespace (str appname ".request")
+       :namespace (str appname ".core")
        :welcome "index.html"
        :sdk sdk
        :war "war"
        ;; we only install to src dirs, leave config to migae plugin
-       :statics_src "src/main/public"
-       :resources_src "src/main/resource"
+       :statics_src "resources/public"
+       :resources_src "resources/public"
        :year (year)
        :proj-url "http://example.com/FIXME"
        :nested-dirs (name-to-path main-ns) ;; foo-bar.core -> foo_bar/core
@@ -132,7 +149,7 @@
         tobase (str/join "/"
                             [(if (= cmdname "app") projname ".")
                              (name-to-path (render-text
-                                            "src/{{appname}}/{{-servlet}}"
+                                            "src/clj/{{appname}}/{{-servlet}}"
                                             pmap))])]
     (do
       (if (= cmdname "servlet")
@@ -150,7 +167,7 @@
                  " :ns \"{{appname}}.{{-servlet}}-servlet\",\n"
                  " :class \"{{_appname}}.{{_servlet}}_servlet\",\n"
                  " :filters [{:filter \"reload_filter\"}],\n"
-                 " :services [{:service \"{{-servlet}}\" :url-pattern  \"/{{-servlet}}/*\"}]}\n")
+                 " :services [{:service \"{{-servlet}}\" :url-pattern  \"/{{-servlet}}\"}]}\n")
             pmap))))
       (binding [*dir* (.getCanonicalPath (io/file
                                           (System/getProperty
@@ -174,7 +191,9 @@
                (pmap :appid)
                ", template: migae")
 
-      (make-servlet projname (list (str/join ":" [(pmap :appname) "request"])))
+      (make-servlet projname (list (str/join ":" [(pmap :appname) "core"])))
+      (make-servlet projname (list (str/join ":" [(pmap :appname) "admin"])))
+      (make-servlet projname (list (str/join ":" [(pmap :appname) "repl"])))
       (make-servlet projname (list (str/join ":" [(pmap :appname) "user"])))
 
       (binding [*dir* (.getPath
@@ -188,7 +207,7 @@
                  ["doc/intro.md" (render "intro.md" pmap)]
                  [".gitignore" (render "gitignore" pmap)]
 
-                 ["src/{{projroot}}/reload_filter.clj"
+                 ["src/clj/{{projroot}}/reload_filter.clj"
                   (render "reload_filter.clj" pmap)]
 
                  ;; ["src/main/java/com/google/apphosting/utils/security/SecurityManagerInstaller.java" (render "SecurityManagerInstaller.java" pmap)]
@@ -216,20 +235,30 @@
                  ;; resources install to source tree
                  ;; migae plugin "config" task will copy to war tree
 
+                 ;; ["{{statics_src}}/{{welcome}}"
+                 ;;  (render "home.html" (conj {:loc "Home"} pmap))]
                  ["{{statics_src}}/{{welcome}}"
-                  (render "home.html" (conj {:loc "Home"} pmap))]
+                  (render "index.html" pmap)]
 
-                 ["{{statics_src}}/html/{{welcome}}"
-                  (render "index.html" (conj {:loc "HTML"} pmap))]
+                 ;; ClojureScript
+                 ["src/cljs/{{appname}}/core.cljs"
+                  (render "core.cljs" pmap)]
+                 ["src/cljs/{{appname}}/connect.cljs"
+                  (render "connect.cljs" pmap)]
+                 ["src/cljs/{{appname}}/dom-helpers.cljs"
+                  (render "dom-helpers.cljs" pmap)]
+
+                 ;; ["{{statics_src}}/html/{{welcome}}"
+                 ;;  (render "index.html" (conj {:loc "HTML"} pmap))]
                  ["{{statics_src}}/404.html"
                   (render "404.html" pmap)]
 
-                 ["{{statics_src}}/html/a/{{welcome}}"
-                  (render "index.html" (conj {:loc "A"} pmap))]
-                 ["{{statics_src}}/html/b/{{welcome}}"
-                  (render "index.html" (conj {:loc "B"} pmap))]
-                 ["{{statics_src}}/request/{{welcome}}"
-                  (render "index.html" (conj {:loc "Request"} pmap))]
+                 ;; ["{{statics_src}}/html/a/{{welcome}}"
+                 ;;  (render "index.html" (conj {:loc "A"} pmap))]
+                 ;; ["{{statics_src}}/html/b/{{welcome}}"
+                 ;;  (render "index.html" (conj {:loc "B"} pmap))]
+                 ;; ["{{statics_src}}/request/{{welcome}}"
+                 ;;  (render "index.html" (conj {:loc "Request"} pmap))]
 
                  ["{{statics_src}}/css/{{project}}.css"
                   (render "project.css" pmap)]
@@ -249,7 +278,7 @@
 (defn migae
   "A Leiningen template for a new migae project"
   [projname & args]
-  ;; projname syntax:  <clj-app>:<gae-app-id>
+  ;; projname syntax: [app | servlet] <clj-app>:<gae-app-id>
   (do
     (cond
      (= projname "app") (make-app projname args)

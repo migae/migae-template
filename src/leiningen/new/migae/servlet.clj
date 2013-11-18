@@ -3,9 +3,11 @@
     (:require [{{appname}}.{{-servlet}}-impl :as impl]
             [ring.util.servlet :as ring]))
 
-(defn -service
-  [this rqst resp]
-    (let [request-map  (ring/build-request-map rqst)
-          response-map (impl/{{-servlet}}-handler request-map)]
-    (when response-map
-      (ring/update-servlet-response resp response-map))))
+(def -service (ring/make-service-method impl/{{-servlet}}-handler))
+
+;; (defn -service
+;;   [this rqst resp]
+;;     (let [request-map  (ring/build-request-map rqst)
+;;           response-map (impl/{{-servlet}}-handler request-map)]
+;;     (when response-map
+;;       (ring/update-servlet-response resp response-map))))
