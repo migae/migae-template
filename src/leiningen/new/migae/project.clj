@@ -54,7 +54,7 @@
           }
   :aot [#".*"]
   ;; :aot [#".*servlet" #".*filter"]
-  :source-paths ["src/clj" "src/cljs"]
+  :source-paths ["src/clj"]
   ;; :resource-paths ["src/"]
   :web-inf "{{war}}/WEB-INF"
   :compile-path "{{war}}/WEB-INF/classes"
@@ -63,7 +63,8 @@
   :jar-exclusions [#".*impl*" #"^WEB-INF/appengine-generated.*$"]
   :clean-targets [:web-inf]
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [org.clojure/clojurescript "0.0-2030"]
+                 [org.clojure/clojurescript "0.0-2030"
+                  :exclusions [org.apache.ant/ant]]
                  [compojure "1.1.5"]
                  [ring/ring-servlet "1.2.0"]
                  ;; [migae/migae-env "0.1.0-SNAPSHOT"]
@@ -85,7 +86,7 @@
   :profiles {:dev {:plugins [[lein-migae "0.1.6-SNAPSHOT"]
                              [lein-libdir "0.1.1"]
                              [lein-cljsbuild "1.0.0-alpha2"]]}}
-  ;; cljsbuild tasks configuration
+  :hooks [leiningen.cljsbuild]
   :cljsbuild {:builds
               {:debug
                {:source-paths ["src/cljs"]

@@ -15,45 +15,76 @@
 (defn- template-path [name path data]
   (io/file name (render-text path data)))
 
+(def ^{:dynamic true} *force?* false)
+
 (defn ->filesx
-  "Generate a file with content. path can be a java.io.File or string.
-  It will be turned into a File regardless. Any parent directories will
-  be created automatically. Data should include a key for :name so that
-  the project is created in the correct directory"
   [{:keys [name] :as data} & paths]
-  (let [dir (or *dir*
+  (let [foonm (println "NAME: " name)
+        ;; fooda (println "DATA: " data)
+        ;; foopa (println "PATHS: " (first paths))
+        dir (or *dir*
                 (-> (System/getProperty "leiningen.original.pwd")
-                    (io/file name) (.getPath)))]
-                                        ;        foo (println (format "->files dir: %s" dir))]
-    (if (or *dir* (.mkdir (io/file dir)))
+                    (io/file name) (.getPath)))
+        foodir (println "DIR: " dir)]
+    (if (or (= "." dir) (.mkdir (io/file dir)) *force?*)
       (doseq [path paths]
-        (do ;(println (format "topath %s" (first path)))
-          (println (format "  rendered: %s" (template-path dir (first path) data)))
-          (if (string? path)
-            (do (println (format "mkdirs %s"  (template-path dir path data)))
-                (.mkdirs (template-path dir path data)))
-            (let [[path content & options] path
-                  path (template-path dir path data)
-                  options (apply hash-map options)]
-              (.mkdirs (.getParentFile path))
-              (io/copy content (io/file path))
-              (when (:executable options)
-                (.setExecutable path true)))))
-        (println (str "Could not create directory " dir
-                      ". Maybe it already exists?"))))))
+
+        (println (format "topath %s" (first path)))
+        (println (format "  rendered: %s" (template-path dir (first path) data)))
+
+        (if (string? path)
+          (.mkdirs (template-path dir path data))
+          (let [[path content & options] path
+                path (template-path dir path data)
+                options (apply hash-map options)]
+            (.mkdirs (.getParentFile path))
+            (io/copy content (io/file path))
+            (when (:executable options)
+              (.setExecutable path true)))))
+      (println (str "Could not create directory " dir
+                      ". Maybe it already exists?"
+                      "  See also :force or --force")))))
+
+
+;; (defn ->filesx
+;;   "Generate a file with content. path can be a java.io.File or string.
+;;   It will be turned into a File regardless. Any parent directories will
+;;   be created automatically. Data should include a key for :name so that
+;;   the project is created in the correct directory"
+;;   [{:keys [name] :as data} & paths]
+;;   (let [dir (or *dir*
+;;                 (-> (System/getProperty "leiningen.original.pwd")
+;;                     (io/file name) (.getPath)))]
+;;                                         ;        foo (println (format "->files dir: %s" dir))]
+;;     (if (or *dir* (.mkdir (io/file dir)))
+;;       (doseq [path paths]
+;;         (do (println (format "topath %s" (first path)))
+;;           (println (format "  rendered: %s" (template-path dir (first path) data)))
+;;           (if (string? path)
+;;             (do (println (format "mkdirs %s"  (template-path dir path data)))
+;;                 (.mkdirs (template-path dir path data)))
+;;             (let [[path content & options] path
+;;                   path (template-path dir path data)
+;;                   options (apply hash-map options)]
+;;               (.mkdirs (.getParentFile path))
+;;               (io/copy content (io/file path))
+;;               (when (:executable options)
+;;                 (.setExecutable path true))))))
+;;         (println (str "Could not create directory " dir
+;;                       ". Maybe it already exists?")))))
 
 (defn make-pmap
-  [args]
+  [[appname appid sdk :as args]]
   (do
     (let
-        [args (first args)
-         project (first args)
-         [appname appid] (str/split (str project) #":")
-         appid (if (not appid)
-                 (do (println "missing gae app-id; using appname")
-                     appname)
-                 appid)
-         sdk (second args)
+        [;;args (first args)
+         ;;project (first args)
+         ;;[appname appid] (str/split (str project) #":")
+         ;; appid (if (not appid)
+         ;;         (do (println "missing gae app-id; using appname")
+         ;;             appname)
+         ;;         appid)
+         ;; sdk (second args)
          render (renderer "migae")
          main-ns (multi-segment (sanitize-ns appname))]
       {:name appname ;; ":name" key required by leiningen
@@ -99,8 +130,8 @@
        :security [{:url-pattern "/admin/*"
                    :web-resource-name "admin"
                    :role-name "admin"}]
-       :display-name (project-name appname)
-       :project (project-name appname)
+       :display-name appname ;; (project-name appname)
+       :project appname ;; (project-name appname)
        :projroot (name-to-path appname) ;; foo-bar -> foo_bar
        :aots [{:aot (str appname ".core-servlet")}
               {:aot (str appname ".admin-servlet")}
@@ -123,9 +154,10 @@
        :log4j-logging "log4j.properties"})))
 
 (defn make-servlet
-  [cmdname & args]  ;; cmdname = app | servlet
-  (let [project (first (first args))
-        [projname servlet] (str/split (str project) #":")
+  [[projname servlet :as args]]
+  ;;[cmdname & args]  ;; cmdname = webapp | servlet
+  (let [;;project (first (first args))
+        ;;[projname servlet] (str/split (str project) #":")
         theservlet (if servlet
                      (do ; (println "making servlet " servlet)
                        servlet)
@@ -146,13 +178,17 @@
         ;;           :name (:name pmap)
         ;;           :projroot (:projroot pmap))
         proj (name-to-path (:appname pmap))
-        tobase (str/join "/"
-                            [(if (= cmdname "app") projname ".")
-                             (name-to-path (render-text
-                                            "src/clj/{{appname}}/{{-servlet}}"
-                                            pmap))])]
+        tobase (str/join "/" [projname (name-to-path (render-text
+                                                      "src/clj/{{appname}}/{{-servlet}}"
+                                                      pmap))])
+        foob (println "tobase: " tobase)
+        ]
+                            ;; [(if (= cmdname "webapp") projname ".")
+                            ;;  (name-to-path (render-text
+                            ;;                 "src/clj/{{appname}}/{{-servlet}}"
+                            ;;                 pmap))])]
     (do
-      (if (= cmdname "servlet")
+      (if (> 0 1) ;; (= cmdname "servlet")
         (do
           (println (format
                     "Generating servlet %s in project %s"
@@ -169,20 +205,30 @@
                  " :filters [{:filter \"reload_filter\"}],\n"
                  " :services [{:service \"{{-servlet}}\" :url-pattern  \"/{{-servlet}}\"}]}\n")
             pmap))))
-      (binding [*dir* (.getCanonicalPath (io/file
-                                          (System/getProperty
-                                           "leiningen.original.pwd")))]
-        (->files pmap
-                 [(str tobase "_servlet.clj")
-                  (render "servlet.clj" pmap)]
-                 [(str tobase "_impl.clj")
-                  (render "servlet_impl.clj" pmap)])))))
+      (binding [*dir* "."]
+      ;; (binding [*dir* (.getCanonicalPath (io/file
+      ;;                                     (System/getProperty
+      ;;                                      "leiningen.original.pwd")))]
+      ;; (binding [*dir* (.getPath
+      ;;                  (io/file
+      ;;                   (System/getProperty "leiningen.original.pwd")
+      ;;                   (:name pmap)))]
+        (let [servlet (str tobase "_servlet.clj")
+              impl    (str tobase "_impl.clj")]
+          (->filesx pmap
+                 [servlet (render "servlet.clj" pmap)]
+                 ;; [(str "\"" tobase "_servlet.clj" "\"") (render "servlet.clj" pmap)]
+                 [impl (render "servlet_impl.clj" pmap)]))
+                 ;; [(str tobase "_impl.clj") (render "servlet_impl.clj" pmap)])
+        ))))
 
-(defn make-app
-  [projname & args]
-  (if (nil? args)
+;;                 ["project.clj" (render "project.clj" pmap)]
+
+(defn make-webapp
+  [[projname appid sdk :as args]]
+  (if (nil? sdk)
     (abort (str "missing sdk path!"
-                "Syntax:  lein new migae myapp:gae-app-id path/to/sdk"))
+                "Syntax:  lein new migae webapp projname gae-app-id path/to/sdk"))
     (let [pmap (make-pmap args)
           render (renderer "migae")]
       (println "Generating migae project:"
@@ -191,16 +237,12 @@
                (pmap :appid)
                ", template: migae")
 
-      (make-servlet projname (list (str/join ":" [(pmap :appname) "core"])))
-      (make-servlet projname (list (str/join ":" [(pmap :appname) "admin"])))
-      (make-servlet projname (list (str/join ":" [(pmap :appname) "repl"])))
-      (make-servlet projname (list (str/join ":" [(pmap :appname) "user"])))
-
       (binding [*dir* (.getPath
                        (io/file
                         (System/getProperty "leiningen.original.pwd")
                         (:name pmap)))]
-        (->files pmap
+
+        (->filesx pmap
                  ;; to file  		from template
                  ["project.clj" (render "project.clj" pmap)]
                  ["README.md" (render "README.md" pmap)]
@@ -226,7 +268,10 @@
                  ;; [".{{appname}}/appengine-web.xml.mustache"
 
                  ["etc/appengine-web.xml.mustache" (render "appengine-web.xml.mustache")]
-                 ["etc/dir-locals.el.mustache" (render "dir-locals.el.mustache")]
+                 ["etc/dir-locals-src-el.mustache"
+                  (render "dir-locals-src-el.mustache")]
+                 ["etc/dir-locals-resources-el.mustache"
+                  (render "dir-locals-resources-el.mustache")]
                  ["etc/logging.properties" (render "logging.properties")]
                  ["etc/log4j.properties" (render "log4j.properties")]
                  ["etc/web.xml.mustache" (render "web.xml.mustache")]
@@ -272,7 +317,12 @@
 
                  ;; TODO: add a spinner, favicon, or other toy graphic
                  ;; ["public/img/{{appname}}.js" (render "public/img/foo.png" pmap)]
-                 )))))
+                 ))
+      (make-servlet [projname "core"])
+      (make-servlet [projname "admin"])
+      (make-servlet [projname "repl"])
+      (make-servlet [projname "user"])
+      )))
 
 ;; main template entry point
 (defn migae
@@ -281,7 +331,7 @@
   ;; projname syntax: [app | servlet] <clj-app>:<gae-app-id>
   (do
     (cond
-     (= projname "app") (make-app projname args)
-     (= projname "servlet") (make-servlet projname args)
-     :else (println "bad cli"))))
+     (= projname "webapp") (make-webapp args) ;; lein new migae servlet projname servlet-name
+     (= projname "servlet") (make-servlet args)
+     :else (println "usage:  lein new migae [webapp | servlet] projname appid sdk-path"))))
                                         ; (make-app projname args))))

@@ -1,6 +1,6 @@
-(defproject migae/lein-template "0.2.5"
+(defproject migae/lein-template "0.3.0-SNAPSHOT"
   :description "migae project template"
-  :url "http://github.com/greynolds/migae-template"
+  :url "http://github.com/mobileink/migae-template"
   :source-paths ["src" "src/main/clojure"]
 ;  :aot [#".*migae.*"]
   :license {:name "Eclipse Public License"
