@@ -9,6 +9,14 @@ Leiningen templates for migae (Google App Engine library.
 `lein new migae servlet myapp:myservlet` - Create a new servlet
 skeleton myservlet in application myapp (run from root dir)
 
+## examples
+
+[source,clojure]
+----
+$ lein new migae ;; defaults to: lein new migae myapp :id myapp-id :compojure
+$ lein new migae myapp :id :myappid :compojure :modules ["moda" "modb" "modc"] :services [:datastore :memcache]
+----
+
 
 ## License
 
