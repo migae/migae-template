@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-	DO NOT EDIT!  THIS IS A TEMPLATE used to generate
-	war/WEB-INF/appengine-web.xml.  Edit project.clj instead.
--->
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
-{{#migae}}
-  <application>{{phase}}</application>
-  <version>{{versionid}}</version>
+  <application>{{app-id}}</application>
+  <version>{{app-version}}</version>
 
-  <threadsafe>{{threads}}</threadsafe>
+  <threadsafe>true</threadsafe>
 
   <!-- <static-files> -->
   <!--   <include path="{{static_include_pattern}}" {{#static_expire}}expiration="{{static_expire}}"{{/static_expire}}/> -->
@@ -41,7 +36,7 @@
 
   <ssl-enabled>false</ssl-enabled>
 
-  <sessions-enabled>{{sessions}}</sessions-enabled>
+  <!-- <sessions-enabled>true</sessions-enabled> -->
 
   <!--
     After enabling Appstats in your web.xml file, uncomment this section to add a custom Appstats link 
@@ -52,5 +47,4 @@
       <page name="Appstats" url="/appstats" />
     </admin-console>
    -->
-{{/migae}}
 </appengine-web-app>

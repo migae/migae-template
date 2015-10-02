@@ -1,0 +1,12 @@
+(ns {{ns.sym}}.servlets)
+
+(gen-class :name {{ns.sym}}.admin
+           :extends javax.servlet.http.HttpServlet
+           :impl-ns {{ns.sym}}.admin)
+(gen-class :name {{ns.sym}}.core
+           :extends javax.servlet.http.HttpServlet
+           :impl-ns {{ns.sym}}.core)
+
+(gen-class :name {{ns.sym}}.reloader
+           :implements [javax.servlet.Filter]
+           :impl-ns {{ns.sym}}.reloader)

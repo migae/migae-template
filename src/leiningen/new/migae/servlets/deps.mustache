@@ -1,0 +1,27 @@
+    [ring.util.servlet :as ring]
+
+{{#clojure}}
+	[[clojure.pprint :as pp]
+	 [clojure.tools.logging :as log :only [debug info]]]
+{{/clojure}}
+{{#compojure}}
+	[[compojure.coercions :as coerc :refer [as-int as-uuid]]
+	[compojure.core :refer :all]
+	[compojure.handler :as handler :refer [api site]]
+	[compojure.route :as route :refer [files resources]]]
+{{/compojure}}
+{{#ring}}
+	;; TODO: split out ring.middleware, ring.util, etc.???
+	[[ring.handler.dump :refer [handle-dump]] ; ring-devel
+	 [ring.middleware.params :refer [wrap-params]] ; ring-core
+	 [ring.middleware.keyword-params :refer [wrap-keyword-params]] ; ring-core
+	 ;; [ring.middleware.nested-params :refer [wrap-nested-params]] ; ring-core
+	 [ring.middleware.defaults :refer :all] ; ring-defaults
+	 [ring.util.response :as r]]
+{{/ring}}
+{{#ringx}}
+	[[ringx.util.http-response :refer :all]]
+{{/ringx}}
+{{#hiccup}}
+	[[hiccup.page :only [html5]]]
+{{/hiccup}}

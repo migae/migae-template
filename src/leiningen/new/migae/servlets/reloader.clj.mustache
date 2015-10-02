@@ -1,0 +1,32 @@
+(ns {{ns.sym}}.reloader
+  (:import (javax.servlet Filter FilterChain FilterConfig
+                          ServletRequest ServletResponse))
+  (:require [ns-tracker.core :refer :all]))
+
+(println "loading {{ns.sym}}.reloader")
+
+(defn -init [^Filter this ^FilterConfig cfg])
+
+(defn -destroy [^Filter this])
+
+;; TODO: use ring.middleware.reload instead?
+
+(def {{project}}-namespaces (ns-tracker ["./WEB-INF/classes/{{#ns.components}}{{component}}/{{/ns.components}}"]))
+
+(defn -doFilter
+  [^Filter this
+   ^ServletRequest rqst
+   ^ServletResponse resp
+   ^FilterChain chain]
+  (doseq [ns-sym ({{project}}-namespaces)]
+    (do
+      (println "ns changed: " ns-sym (type ns-sym))
+      (let [sym (if (symbol? ns-sym)
+                  ns-sym
+                  (last ns-sym))]
+        (require sym
+                 :reload
+                 ;; :verbose
+                 ))))
+  (.doFilter chain rqst resp))
+

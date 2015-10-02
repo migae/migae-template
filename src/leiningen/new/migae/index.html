@@ -7,28 +7,36 @@
 <head>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <title>{{appname}}</title>
+    <title>{{project}}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
     <link rel="stylesheet" type="text/css" media="screen"
-	  href="/css/{{appname}}.css"></link>
+	  href="/css/{{#ns.components}}{{component}}/{{/ns.components}}core.css"></link>
     <!--[if lt IE 9]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 </head>
 
 <body>
-    <h1>Welcome to {{appname}} - a Clojure/ClojureScript Web Application</h1>
+  <center>
+    <h1>Welcome to {{project}}</h1>
+    <h2>a Clojure/ClojureScript Web Application running on</h2>
+    <h2>Google App Engine</h2>
+  </center>
 
+  <div>
     <h2>Servlets and Services</h2>
-    <ul id="theMenu" class="goog-menu">
+    <ul>
   {{#servlets}}
-  {{#services}}
-      <li class="goog-menuitem"><a href="{{url-pattern}}">{{class}}</a></li>
-  {{/services}}
+      <li><a href="{{servlet}}">{{servlet}}</a></li>
   {{/servlets}}
     </ul>
+  </div>
 
-    <!-- pointing to cljsbuild-generated js file -->
-    <script src="js/{{appname}}/core.js"></script>
+  <div>
+    <button id="hello">hello</button>
+  </div>
+
+  <!-- pointing to cljsbuild-generated js file -->
+  <script src="js/{{#ns.components}}{{component}}/{{/ns.components}}core.js"></script>
 </body>
 </html>

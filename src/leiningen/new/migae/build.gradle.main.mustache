@@ -1,0 +1,36 @@
+// https://github.com/GoogleCloudPlatform/gradle-appengine-plugin
+
+buildscript {
+    repositories {
+      jcenter()
+      mavenCentral()
+      maven { url 'http://clojars.org/repo' }
+    }
+    dependencies {
+     classpath 'com.google.appengine:gradle-appengine-plugin:1.9.23'
+     classpath 'clojuresque:clojuresque:1.7.0'
+     classpath 'clojuresque:scriptoresque:1.0.0-SNAPSHOT'
+//         // NOTE: Do not place your application dependencies here; they belong
+//         // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+	mavenCentral()
+        jcenter()
+	maven { url 'http://clojars.org/repo' }
+	mavenLocal()  // ~/.m2, for locally installed stuff
+    }
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+        }
+    }
+}
+
+ext {
+    applicationId =  "migae.examples"
+    sourceCompat = JavaVersion.VERSION_1_7
+    targetCompat = JavaVersion.VERSION_1_7
+}

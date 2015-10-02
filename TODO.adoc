@@ -1,0 +1,56 @@
+\# TODO
+
+* <<demos,demos>>
+* <<interactvity,interactivity>>
+* <<multi,multiple platforms>>
+* <<impl,implementation>>
+
+== [[demos]] demos
+
+$ lein new migae -- :demo :ringish
+
+All projects in migae/lab.clj.appengine available
+
+== [[interactivity]] interactivity
+
+Display spec, ask user to confirm.
+
+== [[multi]] support multiple platforms
+
+E.g. `$ lein new migae :platform :heroku :opt1 :opt2 ...`
+
+The spec map:
+
+[source,clojure]
+----
+$ lein new migae foo
+{:gae
+  {:name "foo",  ;; required by leiningent template mechanism
+   :ns "foo",
+   :project "foo",                    ;=> leiningen defproject name
+   :project-version "0.1.0-SNAPSHOT", ;=> leiningen defproject version
+   :app-id "foo-id",                  ;=> appengine-web.xml <application>
+   :app-version "0-1-0-SNAPSHOT",     ;=> appengine-web.xml <version>
+   :servlets
+     [{:url-pattern "/*",
+       :servlet "core",
+       :description "this is the core implementation"}
+       {:url-pattern "/admin/*",
+        :servlet "admin",
+	:description "this is the admin implementation"
+	:security [{:url-pattern "/admin/*",
+		    :web-resource-name "admin",
+		    :role-name "admin"}]}],
+   :cljs {:dom :domina},
+   :compojure true}
+----
+
+== [[impl]] implementation details
+
+Sanitize :ns
+
+Put the code for each platform in a subdir, e.g.
+
+----
+src/leiningen/new/migae/gae - gae-specific code
+----

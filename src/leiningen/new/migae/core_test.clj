@@ -1,4 +1,4 @@
-(ns {{project}}.core-test
+(ns {{ns.sym}}.core-test
   (:use [{{project}}.core])
   (:refer-clojure :exclude [name hash])
   (:import [com.google.appengine.tools.development.testing

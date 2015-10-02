@@ -1,6 +1,10 @@
-(ns {{appname}}.core
-  (:require [{{appname}}.dom-helpers :as dom]
+(ns {{ns.sym}}.core
+  (:require [;;{{ns}}.dom-helpers :as dom]
             [clojure.string :as str]
+              [hipo.core :as hipo]
+              [dommy.core :refer-macros [sel sel1]]))
+
+
             [goog.events :as evt]
             [goog.ui.Zippy.Events :as ze]
             [goog.ui.Component :as comp]
@@ -14,7 +18,7 @@
 ;; http://closure-library.googlecode.com/git/closure/goog/demos/debug.html
 ;; http://closure-library.googlecode.com/git/closure/goog/demos/menu.html
 
-(def logger (log/getLogger "{{appname}}.core"))
+(def logger (log/getLogger "{{ns}}.core"))
 (def EVENTS (obj/getValues comp/EventType))
 
 (defn logEvent
@@ -26,7 +30,7 @@
 
 (defn init-logger []
   (let [;; make sure popups are not blocked
-        winconsole (goog.debug.FancyWindow. "{{appname}}.core")]
+        winconsole (goog.debug.FancyWindow. "{{ns}}.core")]
     (do
       (.setLevel logger goog.debug.Logger.Level/FINE)
       (.init winconsole)

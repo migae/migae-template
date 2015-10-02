@@ -1,0 +1,60 @@
+// repositories {
+//       maven { url 'http://clojars.org/repo' }
+// }
+
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'appengine'
+apply plugin: 'clojure'
+
+sourceCompatibility = rootProject.ext.sourceCompat
+targetCompatibility = rootProject.ext.targetCompat
+
+dependencies {
+    // required
+    appengineSdk 'com.google.appengine:appengine-java-sdk:1.9.27'
+    compile 'com.google.appengine:appengine-api-labs:1.9.27'
+    compile 'javax.servlet:servlet-api:2.5'
+    compile 'org.clojure:clojure:1.7.0'
+    compile 'ring:ring-servlet:1.4.0'
+{{#clojure}}
+	["compile 'org.clojure:tools.logging:0.3.1'"]
+{{/clojure}}
+{{#compojure}}
+	["compile 'compojure:compojure:1.4.0'"]
+{{/compojure}}
+{{#ring}}["compile 'ring:ring-core:1.4.0'"
+          "compile 'ring:ring-devel:1.4.0'"
+          "compile 'ring:ring-defaults:0.1.5'"]
+{{/ring}}
+{{#ringx}}
+	["compile 'metosin:ringx-http-response:0.6.5'"]
+{{/ringx}}
+    compile 'ns-tracker:ns-tracker:0.3.0'
+{{#cljs}}
+	["compile 'org.clojure:clojurescript:1.7.48'"]
+{{/cljs}}
+{{#hippo}}
+	["compile 'hipo:hipo:0.5.0'"]
+{{/hippo}}
+{{#dommy}}
+	["compile 'prismatic:dommy:1.1.0'"]
+{{/dommy}}
+}
+
+appengine {
+	  // use 0.0.0.0 to test android
+    httpAddress = '0.0.0.0'
+    // jvmFlags =
+    downloadSdk = true
+    // warDir = target
+    appcfg {
+        oauth2 = true
+    }
+}
+
+clojure {
+    warnOnReflection = true
+    aotCompile = true
+    // output.classesDir ??
+}

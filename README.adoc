@@ -4,22 +4,59 @@ Leiningen templates for migae (Google App Engine library.
 
 ## Usage
 
-`lein new migae app myapp:gae-app-id path/to/gae/sdk` - Create webapp myapp, with Google App Engine applicatin Id gae-app-id.
+[source,clojure]
+----
+$ lein new migae <projname> -- [options*]
+----
 
-`lein new migae servlet myapp:myservlet` - Create a new servlet
-skeleton myservlet in application myapp (run from root dir)
+Here <projname> is the leiningen project name, which may be different
+than the Appengine application name; the latter can be specified using
+the `:gid` option.
+
+To pass options to the migae template you must use '--' to separate
+template options from lein options.
+
+## options
+
+Keyword opts (mutually exclusive): just include the keyword, no need to add "true"
+
+* `:ring`, `:compojure` (default), `:compojure-api`
+
+Binary opts:
+
+* `:gid <string>` - google app engine app id, goes in `webapp/WEB-INF/appengine-web.xml`
+* `:ns <string>` - namespace for Clojure source, goes in src/main/clojure
+* `:modules [modname+]` - vector of module name strings for appengine modules
+* `:services [svc+]` - vector of service keywords: `:datastore`, `:memcache`, `:channel`, `:taskqueue`, etc.
+* `:features [feature+] - vector of keywords for features to include
+** :cljs
+** :hiccup
 
 ## examples
 
 [source,clojure]
 ----
-$ lein new migae ;; defaults to: lein new migae myapp :id myapp-id :compojure
-$ lein new migae myapp :id :myappid :compojure :modules ["moda" "modb" "modc"] :services [:datastore :memcache]
+$ lein new migae myapp  ;; defaults: :gid myapp-id :compojure
 ----
 
+This is the default template, where `:gid` defaults to projname with
+`-id` appended (here, `myapp-id`), `:ns` defaults to projname, and one default boolopt,
+`:compojure`.
+
+[source,clojure]
+----
+$ lein new migae myapp -- :ns foo.bar
+----
+This creates project myapp, with clojure source in `src/main/clojure/foo/bar`.
+
+
+[source,clojure]
+----
+$ lein new migae myapp -- :gid :myappid :compojure :modules ["moda" "modb" "modc"] :services [:datastore :memcache]
+----
 
 ## License
 
-Copyright © 2013 Gregg Reynolds
+Copyright © 2013, 2015 Gregg Reynolds
 
 Distributed under the Eclipse Public License, the same as Clojure.
