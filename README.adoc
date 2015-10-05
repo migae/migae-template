@@ -32,6 +32,16 @@ Binary opts:
 ** :cljs
 ** :hiccup
 
+### platforms
+
+For now, just :gae.  In future, maybe:
+
+* :jetty - for using ring jetty w/o servlets
+* :servlet - for servlet containers, generic
+* :tomcat
+* :heroku
+* etc.
+
 ## examples
 
 [source,clojure]
@@ -53,6 +63,23 @@ This creates project myapp, with clojure source in `src/main/clojure/foo/bar`.
 [source,clojure]
 ----
 $ lein new migae myapp -- :gid :myappid :compojure :modules ["moda" "modb" "modc"] :services [:datastore :memcache]
+----
+
+# clojurescript
+
+Conventions:
+
+* output dir defaults to <approot>/scripts
+* output file has same name as app, e.g. scripts/myapp.js
+
+* default is no optimizations
+* default hiccup page uses a function to put this at bottom of body:
+
+[source,clojure]
+----
+       (include-js "scripts/goog/base.js" "/scripts/myapp.js")
+       [:script {:type "text/javascript"}
+        "goog.require('a.b.core')"]]))
 ----
 
 ## License

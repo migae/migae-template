@@ -17,6 +17,7 @@
                                               year]]
              [leiningen.core.main :refer [abort]]))
 
+(defonce specmap (atom {}))
 
 (defn- template-path [name path data]
   (io/file name (render-text path data)))
@@ -118,25 +119,27 @@
 
 (defn render-deps
   [text]
-  (let [reqs (edn/read-string text)
-        render (renderer "migae")]
-    (apply str
-      (for [req reqs]
-        (do
-          ;; (println "req: " req (type req))
-          (if (string? req)
-            (str "    " req \newline)
-            (str "    " req \newline)))))))
-          ;; (render-string (str "    " req (when (not (string? req)) \newline)) nil))))))
+  ;; (println (str "render-deps " text))
+  (let [t (render-string text @specmap)]
+    ;; (println (str "RENDERED: " t))
+    t))
+  ;; (let [reqs (edn/read-string text)
+  ;;       render (renderer "migae")]
+  ;;   (apply str
+  ;;     (for [req reqs]
+  ;;       (do
+  ;;         ;; (println "req: " req (type req))
+  ;;         (if (string? req)
+  ;;           (str "    " req \newline)
+  ;;           (str "    " req \newline)))))))
+  ;;         ;; (render-string (str "    " req (when (not (string? req)) \newline)) nil))))))
 
 (defn- base-templates
   [render spec]
   [["README.adoc" (render "README.adoc" spec)]
    ["doc/intro.adoc" (render "intro.adoc" spec)]
-   [".gitignore" (render "gitignore" spec)]
+   [".gitignore" (render "gitignore" spec)]])
    ;; TODO: parameterize proj subdir
-   ["gae/fswatch.sh" (render "fswatch.sh" spec) :executable true]
-   ["gae/resources/logging.properties" (render "logging.properties" spec)]])
 
 (defn- gradle-templates
   [render spec]
@@ -147,36 +150,47 @@
    ["gradlew.bat" (render "gradlew.bat" spec)]
    ["gradle/wrapper/gradle-wrapper.properties"
     (render "gradle-wrapper.properties" spec)]
-   ["gae/build.gradle" (render "build.gradle.project.mustache" spec)]
+   ["webapp/build.gradle" (render "build.gradle.project.mustache" spec)]
    ["gradle/wrapper/gradle-wrapper.jar"
     (io/file  "./src/leiningen/new/migae/gradle-wrapper.jar")]])
 
-(defn- clojure-templates
+(defn- resources-templates
   [render spec]
-  [["gae/src/main/clojure/{{#ns.components}}{{component}}/{{/ns.components}}/servlets.clj"
+  )
+
+(defn- clj-servlet-templates
+  [render spec]
+  [["webapp/src/main/clojure/{{#ns.components}}{{component}}/{{/ns.components}}/servlets.clj"
     (render "servlets/servlets.clj.mustache" spec)]
-   ["gae/src/main/clojure/{{#ns.components}}{{component}}/{{/ns.components}}core.clj"
+   ["webapp/src/main/clojure/{{#ns.components}}{{component}}/{{/ns.components}}core.clj"
     (render "servlets/core.clj.mustache" spec)]
-   ["gae/src/main/clojure/{{#ns.components}}{{component}}/{{/ns.components}}admin.clj"
+   ["webapp/src/main/clojure/{{#ns.components}}{{component}}/{{/ns.components}}admin.clj"
     (render "servlets/admin.clj.mustache" spec)]
-   ["gae/src/main/clojure/{{#ns.components}}{{component}}/{{/ns.components}}reloader.clj"
+   ["webapp/src/main/clojure/{{#ns.components}}{{component}}/{{/ns.components}}reloader.clj"
     (render "servlets/reloader.clj.mustache" spec)]])
 
-(defn- test-templates
+(defn- gae-cljs-templates
   [render spec]
-  [["gae/test/clojure/core_test.clj" (render "core_test.clj" spec)]])
+  (println "cljs-templates")
+  [["webapp/project.clj" (render "cljs/project.clj.mustache" spec)]
+   ["webapp/src/main/cljs/{{#ns.components}}{{component}}/{{/ns.components}}core.cljs"
+    (render "cljs/core.cljs" spec)]
+   ["webapp/src/main/cljs/{{#ns.components}}{{component}}/{{/ns.components}}connect.cljs"
+    (render "cljs/connect.cljs" spec)]])
 
-(defn- webapp-templates
+(defn- gae-templates
   [render spec]
-  [["gae/src/main/webapp/WEB-INF/classes/log4j.properties" (render "log4j.properties" spec)]
-   ;; ["gae/src/main/webapp/index.html" (render "index.html" spec)]
-   ["gae/src/main/webapp/WEB-INF/appengine-web.xml"
+  [["webapp/fswatch.sh" (render "fswatch.sh" spec) :executable true]
+   ["webapp/resources/logging.properties" (render "logging.properties" spec)]
+   ["webapp/src/main/webapp/WEB-INF/classes/log4j.properties" (render "log4j.properties" spec)]
+   ;; ["webapp/src/main/webapp/index.html" (render "index.html" spec)]
+   ["webapp/src/main/webapp/WEB-INF/appengine-web.xml"
     (render "xml.web-appengine.mustache"spec)]
-   ["gae/src/main/webapp/WEB-INF/web.xml" (render "xml.web.mustache" spec)]
+   ["webapp/src/main/webapp/WEB-INF/web.xml" (render "xml.web.mustache" spec)]
 
    ;; ["{{statics_src}}/html/{{welcome}}"
    ;;  (render "index.html" (conj {:loc "HTML"} spec))]
-   ["gae/src/main/webapp/404.html"
+   ["webapp/src/main/webapp/404.html"
     (render "404.html" spec)]
 
    ;; ["{{statics_src}}/html/a/{{welcome}}"
@@ -186,20 +200,51 @@
    ;; ["{{statics_src}}/request/{{welcome}}"
    ;;  (render "index.html" (conj {:loc "Request"} spec))]
 
-   ["gae/src/main/webapp/css/{{#ns.components}}{{component}}/{{/ns.components}}core.css"
+   ["webapp/src/main/webapp/css/{{#ns.components}}{{component}}/{{/ns.components}}core.css"
     (render "core.css" spec)]
 
-   ["gae/src/main/webapp/js/{{#ns.components}}{{component}}/{{/ns.components}}core.js"
+   ["webapp/src/main/webapp/js/{{#ns.components}}{{component}}/{{/ns.components}}core.js"
     (render "core.js" spec)]
-   ["gae/src/main/webapp/favicon.ico"
-    (render "favicon.ico" spec)]])
+   ["webapp/src/main/webapp/favicon.ico"
+    (render "favicon.ico" spec)]
 
-(defn- cljs-templates
+   (when (:cljs spec)
+     (do
+       ["webapp/src/main/cljs/{{#ns.components}}{{component}}/{{/ns.components}}core.cljs"
+        (render "cljs/core.cljs" spec)]
+       ["webapp/src/main/cljs/{{#ns.components}}{{component}}/{{/ns.components}}connect.cljs"
+        (render "cljs/connect.cljs" spec)]))
+
+   ["webapp/test/clojure/core_test.clj" (render "core_test.clj" spec)]
+   ])
+
+(defn- jetty-templates
   [render spec]
-  [["gae/project.clj" (render "cljs/project.cljs" spec)]
-   ["gae/src/main/cljs/{{#ns.components}}{{component}}/{{/ns.components}}core.cljs" (render "cljs/core.cljs" spec)]
-   ["gae/src/main/cljs/{{#ns.components}}{{component}}/{{/ns.components}}connect.cljs" (render "cljs/connect.cljs" spec)]])
-   ;; ["gae/src/main/cljs/{{#ns.components}}{{component}}/{{/ns.components}}dom-helpers.cljs" (render "dom-helpers.cljs" spec)]
+  (println "jetty-templates")
+  (let [v [["project.clj" (render "jetty/project.clj.mustache" spec)]
+           ["src/log4j.properties" (render "jetty/log4j.properties.mustache" spec)]
+           (if (:polymer spec)
+             ["src/clj/{{#ns.components}}{{component}}/{{/ns.components}}core.clj"
+              (render "polymer/core.clj.mustache" spec)]
+             ["src/clj/{{#ns.components}}{{component}}/{{/ns.components}}core.clj"
+              (render "clj/core.clj.mustache" spec)])
+           ["resources/public/404.html" (render "404.html" spec)]
+           ["test/{{#ns.components}}{{component}}/{{/ns.components}}core_test.clj"
+            (render "jetty/core_test.clj" spec)]
+           ["resources/public/styles/{{#ns.components}}{{component}}/{{/ns.components}}core.css"
+            (render "core.css" spec)]]]
+    (apply
+      merge v
+      (if (:cljs spec)
+        (do ;; clojurescript
+          [["src/cljs/{{#ns.components}}{{component}}/{{/ns.components}}core.cljs"
+            (render "cljs/core.cljs" spec)]
+           ["src/cljs/{{#ns.components}}{{component}}/{{/ns.components}}connect.cljs"
+            (render "cljs/connect.cljs" spec)]])
+        (do ;; plain javascript
+           ["resources/public/scripts/{{#ns.components}}{{component}}/{{/ns.components}}core.js"
+            (render "core.js" spec)])))
+    ))
 
 (defn make-webapp
   [spec]
@@ -213,10 +258,12 @@
         cwd (.getPath
                 (io/file
                  here "src/leiningen/new/migae"))]
+    (pp/pprint "FINAL SPEC:")
+    (pp/pprint spec)
     (println "Generating migae project:"
-             (spec :project)
-             ", gae app id:"
-             (spec :gid))
+             (spec :project))
+             ;; ", gae app id:"
+             ;; (spec :gid))
     ;; (println "HERE: " here)
     ;; (println "CWD: " cwd)
     ;; (println "*dir*: " *dir*)
@@ -229,13 +276,18 @@
                           ;; to file  		from template
     (let [templates (vec (concat
                            (base-templates render spec)
-                           (gradle-templates render spec)
-                           (clojure-templates render spec)
-                           (test-templates render spec)
-                           (webapp-templates render spec)
+                           (cond
+                             (= (:platform spec) :gae)
+                             (do
+                               (gradle-templates render spec)
+                               (gae-templates render spec)
+                               (clj-servlet-templates render spec))
+                             (= (:platform spec) :jetty)
+                             (do
+                               (jetty-templates render spec)))))]
                            ;; (when (some #{:cljs} (:features spec))
-                           (if (:cljs spec)
-                             (cljs-templates render spec))))]
+                           ;; (if (:cljs spec)
+                           ;;   (cljs-templates render spec))))]
           (apply ->filesx spec templates))))
 
 (defn- vet-demo
@@ -250,9 +302,24 @@
   (System/exit -1)
   )
 
+(defn- vet-platform
+  [args]
+  (println "vet-platform")
+  (let [kw (first args)
+        err-msg (str "platform " kw " not yet supported")]
+    (cond
+      (= kw :gae)
+      [{:platform :gae} (next args)]
+      (= kw :jetty)
+      [{:platform :jetty} (next args)]
+      :else
+      (do
+          (println err-msg)
+          (System/exit -1)))))
+
 (defn- vet-cljs
   [args]
-  (println "vet-cljs" args)
+  ;; (println "vet-cljs" args)
   (let [kw (first args)
         requested-deps (second args)
         supported-deps {:dom #{:domina :dommy :hipo}
@@ -261,7 +328,7 @@
                         :testing #{:cljs.test :speclj :purnam.test :clairvoyant}}
         err-msg "option :cljs must be followed by an options map or nothing"
         err-msg-deps (str "bad dependency; allowed are: " supported-deps)]
-    (println "requested-deps: " requested-deps)
+    ;; (println "requested-deps: " requested-deps)
     (cond
       (map? requested-deps)
       (let [rdep-keys (set (keys requested-deps))
@@ -347,6 +414,29 @@
                              modules))))
             (System/exit -1))))))
 
+(defn- vet-polymer
+  [args]
+  (println "vet-polymer" args)
+  (let [kw (first args)
+        requested-options (second args)
+        supported-options #{:js} ;;  :clj :iron #{:list :ajax :pages}}
+        err-msg ":polymer options must be non-empty vector of options"
+        err-msg-bad-option "illegal :polymer option"]
+    (pp/pprint (str "requested polymer options: " requested-options))
+      (cond
+        (not (vector? requested-options))
+        [{kw true} (next args)]
+
+        ;; (empty? requested-options) (do (println err-msg) (System/exit -1))
+
+        :else
+        (if (every? #(contains? supported-options %) requested-options)
+        [{kw requested-options} (nnext args)]
+        (do
+          (println (format "%s: %s" err-msg-bad-option
+                     (pr-str (filter #(not (contains? supported-options %)) requested-options))))
+          (System/exit -1))))))
+
 (defn- vet-services
   [args]
   ;; (println "services opt")
@@ -366,14 +456,16 @@
         ;; (recur (assoc opts arg1 requested-services) (nnext args))
         (do
           (println "unrecognized service(s): "
-            (pr-str (vec (filter #(not (contains? requested-services %)) requested-services))))
+            (pr-str (vec (filter #(not (contains? supported-services %)) requested-services))))
           (System/exit -1))))))
 
 ;; TODO: offer options for standard components, e.g. we might have
 ;;  :datastore :dataomic, :postgres, :gae, :redis, etc.
 
 (def web-components
-  #{:ring :ringx :compojure :compojure-api :schema :async})
+  #{:ring :ringx :compojure :compojure-api :schema :async :polymer})
+
+(def supported-platforms #{:gae :jetty})
 
 (defn- parse-args
   [& args]
@@ -392,24 +484,17 @@
                   (recur (assoc opts arg1 (second args)) (nnext args)))
 
               #(= :ns %)
-              (do (println ":ns")
+              (do #_(println ":ns")
                   (let [ns (second args)
                         cs (string/split (str ns) #"\.")
                         components (into []
                                      (for [c cs]
                                        {:component c}))]
-                    (println "ns: " ns)
-                    (println "components: " components)
+                    ;; (println "ns: " ns)
+                    ;; (println "components: " components)
                     (recur (merge opts {:ns {:sym ns
                                              :components components}})
                              (nnext args))))
-
-              #(= :platform %)
-              (do (println "platform opts")
-                  (if (not= (second args) :gae)
-                    (do
-                      (println "unsupported platform: " (pr-str (second args)))
-                      (System/exit -1))))
 
               #(= :cljs %)
               (let [[entry next-args] (vet-cljs args)]
@@ -419,13 +504,17 @@
               (let [[entry next-args] (vet-demo args)]
                 (recur (merge opts entry) next-args))
 
-              #(= :features %)
-              (let [[entry next-args] (vet-features args)]
-                (recur (merge opts entry) next-args))
+              ;; #(= :features %)
+              ;; (let [[entry next-args] (vet-features args)]
+              ;;   (recur (merge opts entry) next-args))
 
               ;; TODO: prohibit namespaced keywords like :a/b
               #(= :modules %)
               (let [[entry next-args] (vet-modules args)]
+                (recur (merge opts entry) next-args))
+
+              #(= :polymer %)
+              (let [[entry next-args] (vet-polymer args)]
                 (recur (merge opts entry) next-args))
 
               #(= :services %)
@@ -437,7 +526,10 @@
               (let [[entry next-args] (vet-testing args)]
                 (recur (merge opts entry) next-args))
 
-              #(contains? web-components %)
+              #(contains? supported-platforms %)
+              (recur (assoc opts :platform arg1) (next args))
+
+             #(contains? web-components %)
               (do (println "flavor opt" arg1)
                   (recur (assoc opts arg1 true) (next args)))
               ;; (do
@@ -470,6 +562,8 @@
    :app-version "v0-1-0-snapshot"
    ;; app-version: no uppercase; Google recommends starting with alpha; see
    ;; https://cloud.google.com/appengine/docs/java/config/appconfig?hl=en#Java_appengine_web_xml_About_appengine_web_xml
+   :ns {:sym nil
+        :components nil}
    :clojure true
    :compojure true
    :hiccup true
@@ -487,25 +581,25 @@
 (defn migae
   "A Leiningen template for a new migae project"
   ([project & args]
-   (println "project: " project "args: " args)
+   ;; (println "project: " project "args: " args)
    (stencil.loader/set-cache {})
    (let [argstr (clojure.string/join " " args)
          args (edn/read-string (str \( argstr \)))
          opts (apply parse-args args)
+         opts (when (= (:platform opts) :jetty)
+                (merge opts {:ring true, :ringx true}))
          default (into default-map {:project project
                                     :name project ;; required by leiningen implementation
-                                    :ns project
+                                    :ns {:sym project :components project}
                                     :app-id (str project "-id")})
+         default (when (= (:platform opts) :jetty)
+                   (dissoc default :servlets))
          spec (merge default opts)]
-     (println "SPEC:")
+     (println "\nSPEC:")
      (pp/pprint spec)
-     ;; (when (get-in spec [:features :cljs] (add-cljs spec)))
-     ;; (when (get-in spec [:features :hiccup] (add-hiccup spec)))
-     (make-webapp spec))))
-
-  ;; (do
-  ;;   (cond
-  ;;    (= project "webapp") (make-webapp args) ;; lein new migae servlet project servlet-name
-  ;;    (= project "servlet") (make-servlet args)
-  ;;    :else (println "usage:  lein new migae [webapp | servlet] project appid sdk-path"))))
-  ;;                                       ; (make-app project args))))
+     (print "\nProceed? [Y/n] ")(flush)
+     (reset! specmap spec)
+     (let [ok (read-line)]
+       ;; (pp/pprint (str "ok: [" ok "] " (type ok)))
+       (when (or (empty? ok) (= ok "y") (= ok "Y"))
+         (make-webapp spec))))))

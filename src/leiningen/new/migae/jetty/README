@@ -1,0 +1,1 @@
+For :platform :jetty, use leiningen instead of gradle.  gradle is only for appengine.

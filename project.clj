@@ -1,4 +1,4 @@
-(defproject org.mobileink.migae/lein-template "0.5.0-SNAPSHOT"
+(defproject org.mobileink.migae/lein-template "0.5.1-SNAPSHOT"
   :description "migae project template"
   :url "http://github.com/mobileink/migae-template"
   :source-paths ["src" "src/main/clojure"]
