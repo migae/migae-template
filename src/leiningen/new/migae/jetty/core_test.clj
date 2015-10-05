@@ -1,7 +1,7 @@
-(ns {{ns.sym}}.core-test
+(ns {{ns.sym}}.{{project}}.core-test
   (:require [clojure.test :refer :all]
             [ring.mock.request :as mock]
-            [{{ns.sym}}.core :refer :all]))
+            [{{ns.sym}}.{{project}}.core :refer :all]))
 
 (deftest test-app
   (testing "main route"

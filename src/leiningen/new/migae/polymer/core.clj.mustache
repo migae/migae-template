@@ -1,4 +1,4 @@
-(ns {{ns.sym}}.core
+(ns {{ns.sym}}.{{project}}.core
   (:require
 {{#clojure}}
 	[clojure.pprint :as pp]
@@ -60,8 +60,9 @@
   )
 {{/polymer}}
 
-(defroutes app-routes
+(defroutes {{project}}-routes
   (GET "/" []
+    (println "{{project}}-routes")
 {{#hiccup}}
     (html5
 {{/hiccup}}
@@ -86,6 +87,6 @@
   (route/not-found "Not Found"))
 
 (def app
-  (-> app-routes
+  (-> {{project}}-routes
     (wrap-resource "/")
     (wrap-defaults site-defaults)))
