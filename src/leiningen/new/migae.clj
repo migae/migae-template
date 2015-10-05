@@ -225,10 +225,12 @@
   (let [v [["project.clj" (render "jetty/project.clj.mustache" spec)]
            ["src/log4j.properties" (render "jetty/log4j.properties.mustache" spec)]
            (if (:polymer spec)
-             ["src/clj/{{#ns.components}}{{component}}/{{/ns.components}}/{{project}}/core.clj"
-              (render "polymer/core.clj.mustache" spec)]
-             ["src/clj/{{#ns.components}}{{component}}/{{/ns.components}}/{{project}}/core.clj"
-              (render "clj/core.clj.mustache" spec)])
+             (do (println "POLYMER")
+                 ["src/clj/{{#ns.components}}{{component}}/{{/ns.components}}/{{project}}/core.clj"
+                  (render "polymer/core.clj.mustache" spec)])
+             (do (println "NOT POLYMER")
+                 ["src/clj/{{#ns.components}}{{component}}/{{/ns.components}}/{{project}}/core.clj"
+                  (render "clj/core.clj.mustache" spec)]))
            ["resources/public/404.html" (render "404.html" spec)]
            ["test/{{#ns.components}}{{component}}/{{/ns.components}}/{{project}}/core_test.clj"
             (render "jetty/core_test.clj" spec)]

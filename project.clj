@@ -1,4 +1,4 @@
-(defproject migae/lein-template "0.5.1"
+(defproject migae/lein-template "0.5.2-SNAPSHOT"
   :description "migae project template"
   :scm {:name "git"
         :url "https://github.com/migae/migae-template"}
