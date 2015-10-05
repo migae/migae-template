@@ -27,20 +27,20 @@
 ;; templates.clj
 (defn ->filesx
   [{:keys [project] :as data} & paths]
-  (let [;; foonm (println "PROJECT: " project)
-        ;; fooda (println "DATA: " data)
-        ;; foopa (println "PATHS: " (first paths))
+  (let [;;foonm (println "PROJECT: " project)
+        ;;fooda (println "DATA: " data)
+        ;;foopa (println "PATHS: " (first paths))
         ;; log (println "PWD:" (System/getProperty "leiningen.original.pwd"))
         ;; log (println "*dir*" *dir*)
         dir (or *dir*
                 (-> (System/getProperty "leiningen.original.pwd")
                     (io/file project)
                     (.getPath)))
-        ;; foodir (println "DIR: " dir)
         ]
     (if (or (= "." dir) (.mkdir (io/file dir)) *force?*)
       (doseq [path paths]
 
+ ;; (println "DIR: " dir)
  ;; (println "path" path)
 
         (let [to-path (template-path dir (first path) data)]
@@ -143,14 +143,15 @@
 
 (defn- gradle-templates
   [render spec]
-  [["build.gradle" (render "build.gradle.main.mustache" spec)]
+  (println "gradle-templates")
+  [["build.gradle" (render "gae/build.gradle.main.mustache" spec)]
    ["settings.gradle" (render "settings.gradle.mustache" spec)]
    ["gradle.properties" (render "gradle.properties" spec)]
    ["gradlew" (render "gradlew" spec) :executable true]
    ["gradlew.bat" (render "gradlew.bat" spec)]
    ["gradle/wrapper/gradle-wrapper.properties"
     (render "gradle-wrapper.properties" spec)]
-   ["webapp/build.gradle" (render "build.gradle.project.mustache" spec)]
+   ["webapp/build.gradle" (render "gae/build.gradle.project.mustache" spec)]
    ["gradle/wrapper/gradle-wrapper.jar"
     (io/file  "./src/leiningen/new/migae/gradle-wrapper.jar")]])
 
@@ -242,8 +243,8 @@
            ["src/cljs/{{#ns.components}}{{component}}/{{/ns.components}}connect.cljs"
             (render "cljs/connect.cljs" spec)]])
         (do ;; plain javascript
-           ["resources/public/scripts/{{#ns.components}}{{component}}/{{/ns.components}}core.js"
-            (render "core.js" spec)])))
+           [["resources/public/scripts/{{#ns.components}}{{component}}/{{/ns.components}}core.js"
+            (render "core.js" spec)]])))
     ))
 
 (defn make-webapp
@@ -258,8 +259,8 @@
         cwd (.getPath
                 (io/file
                  here "src/leiningen/new/migae"))]
-    (pp/pprint "FINAL SPEC:")
-    (pp/pprint spec)
+    ;; (pp/pprint "FINAL SPEC:")
+    ;; (pp/pprint spec)
     (println "Generating migae project:"
              (spec :project))
              ;; ", gae app id:"
@@ -278,10 +279,12 @@
                            (base-templates render spec)
                            (cond
                              (= (:platform spec) :gae)
-                             (do
-                               (gradle-templates render spec)
-                               (gae-templates render spec)
-                               (clj-servlet-templates render spec))
+                             (let [res (vec
+                                         (gradle-templates render spec)
+                                         (gae-templates render spec)
+                                         (clj-servlet-templates render spec))
+                                   log (pp/pprint (pr-str "RES: " (type res)))]
+                               res)
                              (= (:platform spec) :jetty)
                              (do
                                (jetty-templates render spec)))))]
@@ -469,7 +472,7 @@
 
 (defn- parse-args
   [& args]
-  ;; (println "parsing " args)
+  (println "parsing " args)
   (let [[opts args]
         (loop [opts {}, args args]
           (let [arg1 (first args)]
@@ -554,10 +557,12 @@
                   (println))
                 (System/exit -1))
               )))]
+    (pp/pprint (str "opts: " opts))
+;;    (pp/pprint (str "merged opts: " (merge opts {})))
     (merge opts {})))
 
 (defonce default-map
-  {:platform :gae
+  {:platform :jetty
    :project-version "0.1.0-SNAPSHOT"
    :app-version "v0-1-0-snapshot"
    ;; app-version: no uppercase; Google recommends starting with alpha; see
@@ -566,6 +571,7 @@
         :components nil}
    :clojure true
    :compojure true
+   :ring true
    :hiccup true
    :servlets [{:url-pattern "/*"
                :servlet "core"
@@ -581,20 +587,24 @@
 (defn migae
   "A Leiningen template for a new migae project"
   ([project & args]
-   ;; (println "project: " project "args: " args)
+   (println "project: " project "args: " args)
    (stencil.loader/set-cache {})
    (let [argstr (clojure.string/join " " args)
          args (edn/read-string (str \( argstr \)))
          opts (apply parse-args args)
-         opts (when (= (:platform opts) :jetty)
-                (merge opts {:ring true, :ringx true}))
+log (println "parsed opts: " (str opts))
+         opts (if (= (:platform opts) :jetty)
+                (merge opts {:ring true, :ringx true})
+                opts)
+log (println "opts: " (str opts))
          default (into default-map {:project project
                                     :name project ;; required by leiningen implementation
                                     :ns {:sym project :components project}
                                     :app-id (str project "-id")})
-         default (when (= (:platform opts) :jetty)
-                   (dissoc default :servlets))
-         spec (merge default opts)]
+         spec (merge default opts)
+         spec (if (= (:platform spec) :jetty)
+                   (dissoc spec :servlets)
+                   spec)]
      (println "\nSPEC:")
      (pp/pprint spec)
      (print "\nProceed? [Y/n] ")(flush)

@@ -1,8 +1,7 @@
-(defproject org.mobileink.migae/lein-template "0.5.1-SNAPSHOT"
+(defproject migae/lein-template "0.5.1"
   :description "migae project template"
-  :url "http://github.com/mobileink/migae-template"
-  :source-paths ["src" "src/main/clojure"]
-;  :aot [#".*migae.*"]
+  :scm {:name "git"
+        :url "https://github.com/migae/migae-template"}
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/tools.reader "0.8.16"]]
