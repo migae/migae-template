@@ -42,7 +42,7 @@
 {{#cljs}}
             [lein-cljsbuild "1.1.0"]{{/cljs}}]
 {{#ring}}
-  :ring {:handler {{ns.sym}}.{{project}}.core/app :port 8087}
+  :ring {:handler {{ns.sym}}/app :port 8087}
 {{/ring}}
   :profiles {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
             	              [ring-mock "0.1.5"]]}})

@@ -1,4 +1,9 @@
-(ns {{ns.sym}}.core)
+(ns {{ns.sym}}
+  (:require [clojure.browser.repl :as repl]))
+
+(enable-console-print!)
+
+(repl/connect "http://localhost:9000/repl")
 
 (enable-console-print!)
 

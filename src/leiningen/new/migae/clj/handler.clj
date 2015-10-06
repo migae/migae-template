@@ -1,4 +1,4 @@
-(ns iron-list.handler
+(ns {{ns.sym}} .handler
   (:require [compojure.core :refer :all]
             [compojure.route :as route]
             [ring.handler.dump :refer [handle-dump]]

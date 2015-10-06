@@ -161,22 +161,22 @@
 
 (defn- clj-servlet-templates
   [render spec]
-  [["webapp/src/main/clojure/{{#ns.components}}{{component}}/{{/ns.components}}/servlets.clj"
+  [["webapp/src/main/clojure/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/servlets.clj"
     (render "servlets/servlets.clj.mustache" spec)]
-   ["webapp/src/main/clojure/{{#ns.components}}{{component}}/{{/ns.components}}core.clj"
+   ["webapp/src/main/clojure/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.clj"
     (render "servlets/core.clj.mustache" spec)]
-   ["webapp/src/main/clojure/{{#ns.components}}{{component}}/{{/ns.components}}admin.clj"
+   ["webapp/src/main/clojure/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/admin.clj"
     (render "servlets/admin.clj.mustache" spec)]
-   ["webapp/src/main/clojure/{{#ns.components}}{{component}}/{{/ns.components}}reloader.clj"
+   ["webapp/src/main/clojure/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/reloader.clj"
     (render "servlets/reloader.clj.mustache" spec)]])
 
 (defn- gae-cljs-templates
   [render spec]
   (println "cljs-templates")
   [["webapp/project.clj" (render "cljs/project.clj.mustache" spec)]
-   ["webapp/src/main/cljs/{{#ns.components}}{{component}}/{{/ns.components}}core.cljs"
+   ["webapp/src/main/cljs/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.cljs"
     (render "cljs/core.cljs" spec)]
-   ["webapp/src/main/cljs/{{#ns.components}}{{component}}/{{/ns.components}}connect.cljs"
+   ["webapp/src/main/cljs/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/connect.cljs"
     (render "cljs/connect.cljs" spec)]])
 
 (defn- gae-templates
@@ -201,19 +201,19 @@
    ;; ["{{statics_src}}/request/{{welcome}}"
    ;;  (render "index.html" (conj {:loc "Request"} spec))]
 
-   ["webapp/src/main/webapp/css/{{#ns.components}}{{component}}/{{/ns.components}}core.css"
+   ["webapp/src/main/webapp/css/{{#ns.prefix}}{{component}}/{{/ns.prefix}}core.css"
     (render "core.css" spec)]
 
-   ["webapp/src/main/webapp/js/{{#ns.components}}{{component}}/{{/ns.components}}core.js"
+   ["webapp/src/main/webapp/js/{{#ns.prefix}}{{component}}/{{/ns.prefix}}core.js"
     (render "core.js" spec)]
    ["webapp/src/main/webapp/favicon.ico"
     (render "favicon.ico" spec)]
 
    (when (:cljs spec)
      (do
-       ["webapp/src/main/cljs/{{#ns.components}}{{component}}/{{/ns.components}}core.cljs"
+       ["webapp/src/main/cljs/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.cljs"
         (render "cljs/core.cljs" spec)]
-       ["webapp/src/main/cljs/{{#ns.components}}{{component}}/{{/ns.components}}connect.cljs"
+       ["webapp/src/main/cljs/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/connect.cljs"
         (render "cljs/connect.cljs" spec)]))
 
    ["webapp/test/clojure/core_test.clj" (render "core_test.clj" spec)]
@@ -225,27 +225,25 @@
   (let [v [["project.clj" (render "jetty/project.clj.mustache" spec)]
            ["src/log4j.properties" (render "jetty/log4j.properties.mustache" spec)]
            (if (:polymer spec)
-             (do (println "POLYMER")
-                 ["src/clj/{{#ns.components}}{{component}}/{{/ns.components}}/{{project}}/core.clj"
+             (do #_(println "POLYMER")
+                 ["src/clj/{{#ns.prefix}}{{component}}/{{/ns.prefix}}{{ns.name}}.clj"
                   (render "polymer/core.clj.mustache" spec)])
              (do (println "NOT POLYMER")
-                 ["src/clj/{{#ns.components}}{{component}}/{{/ns.components}}/{{project}}/core.clj"
+                 ["src/clj/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.clj"
                   (render "clj/core.clj.mustache" spec)]))
            ["resources/public/404.html" (render "404.html" spec)]
-           ["test/{{#ns.components}}{{component}}/{{/ns.components}}/{{project}}/core_test.clj"
+           ["test/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/core_test.clj"
             (render "jetty/core_test.clj" spec)]
-           ["resources/public/styles/{{#ns.components}}{{component}}/{{/ns.components}}core.css"
+           ["resources/public/styles/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.css"
             (render "core.css" spec)]]]
     (apply
       merge v
       (if (:cljs spec)
         (do ;; clojurescript
-          [["src/cljs/{{#ns.components}}{{component}}/{{/ns.components}}core.cljs"
-            (render "cljs/core.cljs" spec)]
-           ["src/cljs/{{#ns.components}}{{component}}/{{/ns.components}}connect.cljs"
-            (render "cljs/connect.cljs" spec)]])
+          [["src/cljs/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.cljs"
+            (render "cljs/core.cljs" spec)]])
         (do ;; plain javascript
-           [["resources/public/scripts/{{#ns.components}}{{component}}/{{/ns.components}}core.js"
+           [["resources/public/scripts/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.js"
             (render "core.js" spec)]])))
     ))
 
@@ -489,7 +487,7 @@
                   (recur (assoc opts arg1 (second args)) (nnext args)))
 
               #(= :ns %)
-              (do #_(println ":ns")
+              (do #_(println ":ns " args)
                   (let [ns (second args)
                         cs (string/split (str ns) #"\.")
                         components (into []
@@ -498,7 +496,7 @@
                     ;; (println "ns: " ns)
                     ;; (println "components: " components)
                     (recur (merge opts {:ns {:sym ns
-                                             :components components}})
+                                             :prefix components}})
                              (nnext args))))
 
               #(= :cljs %)
@@ -521,6 +519,9 @@
               #(= :polymer %)
               (let [[entry next-args] (vet-polymer args)]
                 (recur (merge opts entry) next-args))
+
+              #(= :project %)
+              (recur (assoc opts :project (next args)) (nnext args))
 
               #(= :services %)
               (let [[entry next-args] (vet-services args)]
@@ -569,8 +570,6 @@
    :app-version "v0-1-0-snapshot"
    ;; app-version: no uppercase; Google recommends starting with alpha; see
    ;; https://cloud.google.com/appengine/docs/java/config/appconfig?hl=en#Java_appengine_web_xml_About_appengine_web_xml
-   :ns {:sym nil
-        :components nil}
    :clojure true
    :compojure true
    :ring true
@@ -589,19 +588,21 @@
 (defn migae
   "A Leiningen template for a new migae project"
   ([project & args]
-   (println "project: " project "args: " args)
+   (println "project: " project "args: " (type args) (concat (list :project project) args))
    (stencil.loader/set-cache {})
    (let [argstr (clojure.string/join " " args)
          args (edn/read-string (str \( argstr \)))
          opts (apply parse-args args)
-log (println "parsed opts: " (str opts))
          opts (if (= (:platform opts) :jetty)
                 (merge opts {:ring true, :ringx true})
                 opts)
-log (println "opts: " (str opts))
+log (println (str "OPTS: " opts))
+         opts (let [ns (get-in opts [:ns :sym])]
+                (into opts {:ns {:sym (symbol (str (when ns (str ns ".")) project))
+                                   :prefix (get-in opts [:ns :prefix])
+                                   :name (str project)}}))
          default (into default-map {:project project
                                     :name project ;; required by leiningen implementation
-                                    :ns {:sym project :components project}
                                     :app-id (str project "-id")})
          spec (merge default opts)
          spec (if (= (:platform spec) :jetty)
