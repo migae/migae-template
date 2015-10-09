@@ -108,9 +108,9 @@
   [name & [render-fn]]
   (let [render (or render-fn render-text)]
     (fn [template & [data]]
-      (println "rendering " template) ;; " data: " data)
+      ;; (println "rendering " template) ;; " data: " data)
       (let [path (string/join "/" ["leiningen" "new" (sanitize name) template])]
-        ;; (println "RENDERER PATH:" path)
+        ;; (println "rendering " path)
         (if-let [resource (io/resource path)]
           (if data
             (render (slurp-resource resource) data)
@@ -299,7 +299,7 @@
 
 (defn make-webapp
   [spec]
-  (log/info "make-webapp")
+  ;; (log/info "make-webapp")
   (let [spec (into {} (map (fn [[k v]]
                              (if (= v true)
                                {k render-deps}
@@ -310,8 +310,8 @@
         cwd (.getPath
                 (io/file
                  here "src/leiningen/new/migae"))]
-    (pp/pprint "FINAL SPEC:")
-    (pp/pprint spec)
+    ;; (pp/pprint "FINAL SPEC:")
+    ;; (pp/pprint spec)
     (println "Generating migae project:" (spec :project))
                           ;; to file  		from template
     (let [base (base-templates render spec)
@@ -339,7 +339,7 @@
       ;; (pp/pprint templates)
       ;; (log/info "RAW:")
       ;; (pp/pprint raw)
-      (apply ->filesx spec raw))))
+      (apply ->files spec raw))))
 
 (defn- vet-demo
   [args]
@@ -355,7 +355,7 @@
 
 (defn- vet-platform
   [args]
-  (println "vet-platform")
+  ;; (println "vet-platform")
   (let [kw (first args)
         err-msg (str "platform " kw " not yet supported")]
     (cond
@@ -467,13 +467,13 @@
 
 (defn- vet-polymer
   [args]
-  (println "vet-polymer" args)
+  ;; (println "vet-polymer" args)
   (let [kw (first args)
         requested-options (second args)
         supported-options #{:js} ;;  :clj :iron #{:list :ajax :pages}}
         err-msg ":polymer options must be non-empty vector of options"
         err-msg-bad-option "illegal :polymer option"]
-    (pp/pprint (str "requested polymer options: " requested-options))
+    ;; (pp/pprint (str "requested polymer options: " requested-options))
       (cond
         (not (vector? requested-options))
         [{kw true} (next args)]
@@ -520,7 +520,7 @@
 
 (defn- parse-args
   [& args]
-  (println "parsing " args)
+  ;; (println "parsing " args)
   (let [[opts args]
         (loop [opts {}, args args]
           (let [arg1 (first args)]
@@ -610,7 +610,7 @@
                   (println))
                 (System/exit -1))
               )))]
-    (pp/pprint (str "opts: " opts))
+    ;; (pp/pprint (str "opts: " opts))
 ;;    (pp/pprint (str "merged opts: " (merge opts {})))
     (merge opts {})))
 
@@ -639,7 +639,7 @@
 (defn migae
   "A Leiningen template for a new migae project"
   ([project & args]
-   (println "project: " project "args: " (type args) (concat (list :project project) args))
+   ;; (println "project: " project "args: " (type args) (concat (list :project project) args))
    (stencil.loader/set-cache {})
    (let [argstr (clojure.string/join " " args)
          args (edn/read-string (str \( argstr \)))
@@ -647,7 +647,6 @@
          opts (if (= (:platform opts) :jetty)
                 (merge opts {:ring true, :ringx true})
                 opts)
-log (println (str "OPTS: " opts))
          opts (let [ns (get-in opts [:ns :sym])]
                 (into opts {:ns {:sym (symbol (str (when ns (str ns ".")) project))
                                    :prefix (get-in opts [:ns :prefix])
