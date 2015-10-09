@@ -1,0 +1,57 @@
+(defproject {{project}} "0.1.0-SNAPSHOT"
+  :description "FIXME: write description"
+  :url "http://example.com/FIXME"
+  :min-lein-version "2.0.0"
+  :source-paths ["src/clj" "src/cljc"]
+  :resource-paths ["resources/public"]
+  :dependencies [[org.clojure/clojure "1.7.0"]
+{{#cljs}}
+                 [org.clojure/clojurescript "1.7.48"]
+{{/cljs}}
+{{#compojure}}
+                 [compojure "1.4.0"]
+{{/compojure}}
+{{#hiccup}}
+                 [hiccup "1.0.5"]
+{{/hiccup}}
+{{#polymer}}
+                 [polymeraj "1.1.4-SNAPSHOT"]
+{{/polymer}}
+{{#ring}}
+                 [ring/ring-core "1.4.0"]
+		 [ring/ring-defaults "0.1.5"]
+                 [ring/ring-devel "1.4.0"]
+                 [metosin/ring-http-response "0.6.5"]
+{{/ring}}
+                 [org.clojure/tools.logging "0.3.1"]
+                 [org.slf4j/slf4j-log4j12 "1.7.1"]
+                 [log4j/log4j "1.2.17" :exclusions [javax.mail/mail
+                                                    javax.jms/jms
+                                                    com.sun.jmdk/jmxtools
+                                                    com.sun.jmx/jmxri]]
+		]
+{{#cljs}}
+  :cljsbuild {
+              :builds [{
+                        :source-paths ["src/clj" "src/cljs"]
+                        :compiler {
+                                   :output-to "resources/public/scripts/{{ns.sym}}.js"
+                                   :output-dir "resources/public/scripts/cljs-tmp"
+                                   :optimizations :whitespace
+                                   :pretty-print true}}]}
+{{/cljs}}
+  :plugins [{{#ring}}[lein-ring "0.9.7"]
+{{/ring}}
+{{#cljs}}
+            [lein-cljsbuild "1.1.0"]{{/cljs}}]
+{{#ring}}
+  :ring {:handler {{ns.sym}}/app :port 8087}
+{{/ring}}
+  :profiles {:dev {:dependencies [
+{{#gae}}
+x    	  		  [javax.servlet/servlet-api "2.5"]
+{{/gae}}
+{{#ring}}
+            	              [ring-mock "0.1.5"]
+{{/ring}}
+			      ]}})

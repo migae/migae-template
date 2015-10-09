@@ -1,6 +1,7 @@
 (ns leiningen.new.migae
   (:require  [clojure.java.io :as io]
              [clojure.tools.reader.edn :as edn :only [read read-string]]
+             [clojure.tools.logging :as log :refer [trace debug info]]
              [clojure.set :as set]
              [clojure.string :as string]
              [clojure.pprint :as pp]
@@ -107,7 +108,7 @@
   [name & [render-fn]]
   (let [render (or render-fn render-text)]
     (fn [template & [data]]
-      ;; (println "render " template " data: " data)
+      (println "rendering " template) ;; " data: " data)
       (let [path (string/join "/" ["leiningen" "new" (sanitize name) template])]
         ;; (println "RENDERER PATH:" path)
         (if-let [resource (io/resource path)]
@@ -136,10 +137,14 @@
 
 (defn- base-templates
   [render spec]
-  [["README.adoc" (render "README.adoc" spec)]
-   ["doc/intro.adoc" (render "intro.adoc" spec)]
-   [".gitignore" (render "gitignore" spec)]])
-   ;; TODO: parameterize proj subdir
+  ;; (log/info "base-templates")
+  [["README.adoc" "README.adoc"]
+   ["doc/intro.adoc" "intro.adoc"]
+   [".gitignore" "gitignore"]])
+
+  ;; [["README.adoc" (render "README.adoc" spec)]
+  ;;  ["doc/intro.adoc" (render "intro.adoc" spec)]
+  ;;  [".gitignore" (render "gitignore" spec)]])
 
 (defn- gradle-templates
   [render spec]
@@ -221,34 +226,80 @@
 
 (defn- jetty-templates
   [render spec]
-  (println "jetty-templates")
-  (let [v [["project.clj" (render "jetty/project.clj.mustache" spec)]
-           ["src/log4j.properties" (render "jetty/log4j.properties.mustache" spec)]
-           (if (:polymer spec)
-             (do #_(println "POLYMER")
+  ;; (println "jetty-templates")
+  (let [v [["resources/public/404.html" "404.html"]
+           ["test/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/core_test.clj" "jetty/core_test.clj"]
+           ;; ["resources/public/styles/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.css"
+           ;;  "core.css"]
+           ]
+
+        p (if (:polymer spec)
+            (do #_(println "POLYMER")
+                [["project.clj" "polymer/project.clj.mustache"]
                  ["src/clj/{{#ns.prefix}}{{component}}/{{/ns.prefix}}{{ns.name}}.clj"
-                  (render "polymer/core.clj.mustache" spec)])
-             (do (println "NOT POLYMER")
-                 ["src/clj/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.clj"
-                  (render "clj/core.clj.mustache" spec)]))
-           ["resources/public/404.html" (render "404.html" spec)]
-           ["test/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/core_test.clj"
-            (render "jetty/core_test.clj" spec)]
-           ["resources/public/styles/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.css"
-            (render "core.css" spec)]]]
-    (apply
-      merge v
-      (if (:cljs spec)
-        (do ;; clojurescript
-          [["src/cljs/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.cljs"
-            (render "cljs/core.cljs" spec)]])
-        (do ;; plain javascript
-           [["resources/public/scripts/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.js"
-            (render "core.js" spec)]])))
-    ))
+                 "polymer/core.clj.mustache"]
+                 ["src/clj/{{#ns.prefix}}{{component}}/{{/ns.prefix}}{{ns.name}}/components.clj"
+                 "polymer/components.clj.mustache"]
+                 ["src/clj/{{#ns.prefix}}{{component}}/{{/ns.prefix}}{{ns.name}}/home.clj"
+                 "polymer/home.clj.mustache"]
+
+                 ["resources/public/log4j.properties" "polymer/log4j.properties.mustache"]
+
+                 ["resources/public/scripts/lib/page/.bower.json" "js/page/.bower.json"]
+                 ["resources/public/scripts/lib/page/.jsbeautifyrc" "js/page/.jsbeautifyrc"]
+                 ["resources/public/scripts/lib/page/.jshintrc" "js/page/.jshintrc"]
+                 ["resources/public/scripts/lib/page/bower.json" "js/page/bower.json"]
+                 ["resources/public/scripts/lib/page/index.js" "js/page/index.js"]
+                 ["resources/public/scripts/lib/page/page.js" "js/page/page.js"]
+
+                 ["resources/public/styles/shared/style_modules.html" "polymer/styles/shared/style_modules.html"]
+                 ["resources/public/styles/{{project}}/home.css" "polymer/styles/home.css"]
+                 ["resources/public/themes/{{project}}/home.html" "polymer/themes/home.html"]
+
+                ])
+            (do (println "NOT POLYMER")
+                ["src/clj/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.clj"
+                 "clj/core.clj.mustache"]))
+
+        c (if (:cljs spec)
+            (do ;; clojurescript
+              [["src/clj/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}/components.cljs"
+                "polymer/components.cljs.mustache"]
+               ["src/cljs/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.cljs"
+                "polymer/core.cljs.mustache"]])
+            (do ;; plain javascript
+              [["resources/public/scripts/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.js"
+                "core.js"]]))]
+    (concat v p c)))
+
+  ;; (let [v [["project.clj" (render "jetty/project.clj.mustache" spec)]
+  ;;          ["src/log4j.properties" (render "jetty/log4j.properties.mustache" spec)]
+  ;;          (if (:polymer spec)
+  ;;            (do #_(println "POLYMER")
+  ;;                ["src/clj/{{#ns.prefix}}{{component}}/{{/ns.prefix}}{{ns.name}}.clj"
+  ;;                 (render "polymer/core.clj.mustache" spec)])
+  ;;            (do (println "NOT POLYMER")
+  ;;                ["src/clj/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.clj"
+  ;;                 (render "clj/core.clj.mustache" spec)]))
+  ;;          ["resources/public/404.html" (render "404.html" spec)]
+  ;;          ["test/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/core_test.clj"
+  ;;           (render "jetty/core_test.clj" spec)]
+  ;;          ["resources/public/styles/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.css"
+  ;;           (render "core.css" spec)]]
+  ;;       p (apply
+  ;;           merge v
+  ;;           (if (:cljs spec)
+  ;;             (do ;; clojurescript
+  ;;               [["src/cljs/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.cljs"
+  ;;                 (render "cljs/core.cljs" spec)]])
+  ;;             (do ;; plain javascript
+  ;;               [["resources/public/scripts/{{#ns.prefix}}{{component}}/{{/ns.prefix}}/{{ns.name}}.js"
+  ;;                 (render "core.js" spec)]])))]
+
 
 (defn make-webapp
   [spec]
+  (log/info "make-webapp")
   (let [spec (into {} (map (fn [[k v]]
                              (if (= v true)
                                {k render-deps}
@@ -259,39 +310,36 @@
         cwd (.getPath
                 (io/file
                  here "src/leiningen/new/migae"))]
-    ;; (pp/pprint "FINAL SPEC:")
-    ;; (pp/pprint spec)
-    (println "Generating migae project:"
-             (spec :project))
-             ;; ", gae app id:"
-             ;; (spec :gid))
-    ;; (println "HERE: " here)
-    ;; (println "CWD: " cwd)
-    ;; (println "*dir*: " *dir*)
-
-    ;; (binding [*dir* (.getPath
-    ;;                  (io/file
-    ;;                   here
-    ;;                   (:project spec)))]
-
+    (pp/pprint "FINAL SPEC:")
+    (pp/pprint spec)
+    (println "Generating migae project:" (spec :project))
                           ;; to file  		from template
-    (let [templates (vec (concat
-                           (base-templates render spec)
-                           (cond
-                             (= (:platform spec) :gae)
-                             (let [res (vec
-                                         (gradle-templates render spec)
-                                         (gae-templates render spec)
-                                         (clj-servlet-templates render spec))
-                                   log (pp/pprint (pr-str "RES: " (type res)))]
-                               res)
-                             (= (:platform spec) :jetty)
-                             (do
-                               (jetty-templates render spec)))))]
-                           ;; (when (some #{:cljs} (:features spec))
-                           ;; (if (:cljs spec)
-                           ;;   (cljs-templates render spec))))]
-          (apply ->filesx spec templates))))
+    (let [base (base-templates render spec)
+          platform (cond (= (:platform spec) :gae)
+                         (let [res (vec
+                                     (gradle-templates render spec)
+                                     (gae-templates render spec)
+                                     (clj-servlet-templates render spec))
+                               log (pp/pprint (pr-str "RES: " (type res)))]
+                           res)
+                         (= (:platform spec) :jetty)
+                         (do
+                           (jetty-templates render spec)))
+          templates (concat base platform)
+          raw (into [] (for [[k v] templates]
+                         (do
+                           (log/trace "rendering key: " k)
+                           [k (render v spec)])))
+          ]
+      ;; (log/info "base:")
+      ;; (pp/pprint base)
+      ;; (log/info "platform: ")
+      ;; (pp/pprint platform)
+      ;; (log/info "TEMPLATES:")
+      ;; (pp/pprint templates)
+      ;; (log/info "RAW:")
+      ;; (pp/pprint raw)
+      (apply ->filesx spec raw))))
 
 (defn- vet-demo
   [args]
@@ -312,9 +360,9 @@
         err-msg (str "platform " kw " not yet supported")]
     (cond
       (= kw :gae)
-      [{:platform :gae} (next args)]
+      [{:gae true, :platform :gae} (next args)]
       (= kw :jetty)
-      [{:platform :jetty} (next args)]
+      [{:jetty true, :platform :jetty} (next args)]
       :else
       (do
           (println err-msg)
@@ -507,6 +555,8 @@
               (let [[entry next-args] (vet-demo args)]
                 (recur (merge opts entry) next-args))
 
+              ;; #(= :gae %)
+
               ;; #(= :features %)
               ;; (let [[entry next-args] (vet-features args)]
               ;;   (recur (merge opts entry) next-args))
@@ -566,6 +616,7 @@
 
 (defonce default-map
   {:platform :jetty
+   :jetty true
    :project-version "0.1.0-SNAPSHOT"
    :app-version "v0-1-0-snapshot"
    ;; app-version: no uppercase; Google recommends starting with alpha; see

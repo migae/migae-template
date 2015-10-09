@@ -1,0 +1,24 @@
+# :trace, :debug, :info, :warn, :error, :fatal
+log4j.rootLogger=INFO, console
+log4j.appender.console=org.apache.log4j.ConsoleAppender
+log4j.appender.console.encoding=UTF-8
+log4j.appender.console.layout=org.apache.log4j.EnhancedPatternLayout
+log4j.appender.console.layout.ConversionPattern=%d{ISO8601}  %c%n%p: %m%n
+
+log4j.logger.{{ns.sym}}=TRACE, main
+log4j.additivity.{{ns.sym}}=false
+log4j.appender.main=org.apache.log4j.ConsoleAppender
+log4j.appender.main.layout=org.apache.log4j.PatternLayout
+log4j.appender.main.layout.ConversionPattern=%-5p %c: %m%n
+
+log4j.logger.{{ns.sym}}.home=TRACE, page
+log4j.additivity.{{ns.sym}}.home=false
+log4j.appender.page=org.apache.log4j.ConsoleAppender
+log4j.appender.page.layout=org.apache.log4j.PatternLayout
+log4j.appender.page.layout.ConversionPattern=%-5p %c: %m%n
+
+log4j.logger.polymeraj.hiccup=WARN, polymeraj
+log4j.additivity.polymeraj.hiccup=false
+log4j.appender.polymeraj=org.apache.log4j.ConsoleAppender
+log4j.appender.polymeraj.layout=org.apache.log4j.PatternLayout
+log4j.appender.polymeraj.layout.ConversionPattern=%-5p %c: %m%n

@@ -1,0 +1,40 @@
+(ns {{ns.sym}}.components
+  (:require [clojure.browser.repl :as repl]))
+
+(enable-console-print!)
+
+(def main (.querySelector js/document "#main"))
+
+(println "registering my-list")
+(js/Polymer
+  #js {:is "my-list"
+       :properties  #js {:items #js {:type js/Array
+                                     :notify true}}})
+
+(.addEventListener main "dom-change"
+  (fn []
+    (println "DOM-CHANGE")
+    (let [ml (.querySelector js/document "my-list")]
+      (set! (.-items ml) (clj->js
+                           ["HTML/Webcomponents as a Clojure language extension!"
+                            "Webpages as Clojure co-routines!  In co-namespaces!"
+                            "Webcomponents as Clojure (co-)functions!"
+                            "Seamless integration with Clojurescript!"
+                            "Plus:"
+                            "Responsive Web App boilerplate",
+                            "Iron Elements and Paper Elements",
+                            "End-to-end Build Tooling (including Vulcanize)",
+                            "Unit testing with Web Component Tester",
+                            "Routing with Page.js",
+                            "Offline support with the Platinum Service Worker Elements"])))))
+
+
+(println "registering my-greeting")
+(js/Polymer
+  #js {:is "my-greeting"
+       :properties  #js {:greeting #js {:type js/String
+                                        :value "Welcome!"
+                                        :notivy true}}})
+
+(println "component co-functions registered")
+
